@@ -67,7 +67,10 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "bench": "node --experimental-strip-types bench/pipeline.bench.ts",
-    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build",
+    "example:quickstart": "npm run build && node examples/quickstart/server.ts",
+    "example:crm": "npm run build && node examples/crm-server/server.ts",
+    "example:telegram": "npm run build && node examples/telegram-approval/server.ts"
   },
   "peerDependencies": {
     "@modelcontextprotocol/client": "^2.0.0",
