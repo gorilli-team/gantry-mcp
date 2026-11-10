@@ -67,6 +67,7 @@ describe("examples/telegram-approval", () => {
     const app = createTelegram({
       secret: SECRET,
       chatId: "42",
+      approverIds: [1001],
       send: async (method, body) => void sent.push({ method, body }),
     });
     const t = await gantryTest(app.g, { principal: "agent" });
@@ -88,11 +89,22 @@ describe("examples/telegram-approval", () => {
         callback_query: { id: "q0", data: approveData, message: { chat: { id: 7 } } },
       }),
     ).toEqual({ ok: false });
+    // A chat member who is not an approver is ignored.
+    expect(
+      await app.onCallback({
+        callback_query: {
+          id: "qx",
+          data: approveData,
+          from: { id: 7 },
+          message: { chat: { id: 42 } },
+        },
+      }),
+    ).toEqual({ ok: false });
     const res = await app.onCallback({
       callback_query: {
         id: "q1",
         data: approveData,
-        from: { username: "paolo" },
+        from: { id: 1001, username: "paolo" },
         message: { chat: { id: 42 } },
       },
     });
@@ -102,7 +114,12 @@ describe("examples/telegram-approval", () => {
     // Handles are single use.
     expect(
       await app.onCallback({
-        callback_query: { id: "q2", data: approveData, message: { chat: { id: 42 } } },
+        callback_query: {
+          id: "q2",
+          data: approveData,
+          from: { id: 1001 },
+          message: { chat: { id: 42 } },
+        },
       }),
     ).toEqual({ ok: false });
     expect(await app.onCallback({})).toEqual({ ok: false });

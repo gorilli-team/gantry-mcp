@@ -3,12 +3,13 @@
  * the human taps Approve or Deny in Telegram, the webhook calls `decide()`,
  * and the agent's retry runs the tool.
  *
- * Env: GANTRY_SECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_WEBHOOK_SECRET
+ * Env: GANTRY_SECRET, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_APPROVER_IDS (comma separated
+ * Telegram user ids), TELEGRAM_WEBHOOK_SECRET
  */
 import { createHash, timingSafeEqual } from "node:crypto";
 import { createServer as createHttpServer } from "node:http";
 import { gantry } from "@gorilli/gantry-mcp";
-import { type ApprovalRequest, approval, escapeHtml } from "@gorilli/gantry-mcp/modules";
+import { type ApprovalRequest, approval, escapeHtml, rateLimit } from "@gorilli/gantry-mcp/modules";
 import { McpServer } from "@modelcontextprotocol/server";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { z } from "zod";
@@ -27,10 +28,17 @@ export function telegramApi(botToken: string): Send {
   };
 }
 
-export function createServer(opts: { secret: string; chatId: string; send: Send }) {
+export function createServer(opts: {
+  secret: string;
+  chatId: string;
+  /** Telegram user ids allowed to decide. Anyone else in the chat is ignored. */
+  approverIds: Array<number | string>;
+  send: Send;
+}) {
+  const approvers = new Set(opts.approverIds.map(String));
   // Telegram limits callback_data to 64 bytes, so buttons carry a short
   // handle and the signed decision tokens stay on the server.
-  const pending = new Map<string, { approve: string; deny: string }>();
+  const pending = new Map<string, { approve: string; deny: string; expiresAt: number }>();
 
   const appr = approval({
     mode: "out-of-band",
@@ -39,7 +47,12 @@ export function createServer(opts: { secret: string; chatId: string; send: Send 
     preview: (ctx) => `${ctx.tool.name} for ${ctx.principal}: ${JSON.stringify(ctx.args)}`,
     notifier: async (req: ApprovalRequest) => {
       const handle = req.proposalId.replaceAll("-", "").slice(0, 32);
-      pending.set(handle, { approve: req.approveToken, deny: req.denyToken });
+      for (const [h, p] of pending) if (p.expiresAt <= Date.now()) pending.delete(h);
+      pending.set(handle, {
+        approve: req.approveToken,
+        deny: req.denyToken,
+        expiresAt: req.expiresAt,
+      });
       await opts.send("sendMessage", {
         chat_id: opts.chatId,
         parse_mode: "HTML",
@@ -58,7 +71,8 @@ export function createServer(opts: { secret: string; chatId: string; send: Send 
   });
 
   const server = new McpServer({ name: "ops", version: "1.0.0" });
-  const g = gantry(server, { use: [appr] });
+  // Rate limit first, so an agent cannot flood the approver with requests.
+  const g = gantry(server, { use: [rateLimit({ perPrincipal: "10/hour" }), appr] });
 
   g.tool(
     "restart_service",
@@ -77,13 +91,14 @@ export function createServer(opts: { secret: string; chatId: string; send: Send 
     callback_query?: {
       id: string;
       data?: string;
-      from?: { username?: string };
+      from?: { id?: number | string; username?: string };
       message?: { chat?: { id?: number | string } };
     };
   }) {
     const q = update.callback_query;
     if (!q?.data) return { ok: false as const };
     if (String(q.message?.chat?.id) !== String(opts.chatId)) return { ok: false as const };
+    if (!approvers.has(String(q.from?.id))) return { ok: false as const };
     const [kind, handle] = q.data.split(":");
     const tokens = handle ? pending.get(handle) : undefined;
     if (!tokens || (kind !== "a" && kind !== "d")) return { ok: false as const };
@@ -114,6 +129,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const app = createServer({
     secret: env("GANTRY_SECRET"),
     chatId: env("TELEGRAM_CHAT_ID"),
+    approverIds: env("TELEGRAM_APPROVER_IDS").split(","),
     send: telegramApi(env("TELEGRAM_BOT_TOKEN")),
   });
 
