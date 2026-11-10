@@ -274,7 +274,8 @@ export class Gantry {
     return async (args, rawCtx) => {
       const sdk = (rawCtx ?? {}) as SdkContextLike;
       const requestId = randomUUID();
-      const sessionId = sdk.sessionId;
+      // An empty session id means no session.
+      const sessionId = sdk.sessionId ? sdk.sessionId : undefined;
       const meta = sdk.mcpReq?._meta ?? sdk._meta;
       const reserved = {
         ...reservedFromMeta(meta),

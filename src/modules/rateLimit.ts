@@ -56,8 +56,13 @@ export function rateLimit(options: RateLimitOptions): Middleware {
     const out: Bucket[] = [];
     if (global) out.push({ scope: "global", id: "*", rate: global });
     if (perPrincipal) out.push({ scope: "principal", id: ctx.principal, rate: perPrincipal });
-    if (perSession)
-      out.push({ scope: "session", id: ctx.sessionId ?? `p:${ctx.principal}`, rate: perSession });
+    if (perSession) {
+      out.push({
+        scope: "session",
+        id: `${ctx.principal}\u0000${ctx.sessionId ?? ""}`,
+        rate: perSession,
+      });
+    }
     const tool = perTool.get(ctx.tool.name);
     if (tool) out.push({ scope: `tool:${ctx.tool.name}`, id: ctx.principal, rate: tool });
     if (custom) {
