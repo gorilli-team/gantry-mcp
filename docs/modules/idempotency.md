@@ -1,5 +1,7 @@
 # idempotency
 
+<img src="../../assets/gorilli/banana.webp" alt="Gorilli mascot eating a banana: one banana, eaten once" width="140" align="right">
+
 Agents retry. This makes sure a retried write does not run twice.
 
 ```ts

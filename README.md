@@ -22,7 +22,7 @@
 
 Every MCP server that touches real data ends up writing the same code around its tools: ask a human before destructive writes, don't run a write twice when the agent retries, cap how often and how much, log what happened, stop slow calls, keep huge outputs out of the agent's context.
 
-Gantry does it once, as composable middleware on the official TypeScript SDK. **Express did this for HTTP. Gantry does it for MCP tools.**
+Gantry does it once, as composable middleware on the official TypeScript SDK. **Express did this for HTTP. Gantry does it for MCP tools.** Built by [Gorilli](https://github.com/gorilli-team), the gorillas who got tired of writing it by hand.
 
 ```ts
 import { McpServer } from "@modelcontextprotocol/server";
@@ -50,6 +50,8 @@ The agent calls `delete_client`. The user is asked in their client and approves.
 
 ## Install
 
+<img src="assets/gorilli/banana.webp" alt="Gorilli mascot eating a banana" width="150" align="right">
+
 ```bash
 npm install @gorilli/gantry-mcp @modelcontextprotocol/server zod
 ```
@@ -57,6 +59,8 @@ npm install @gorilli/gantry-mcp @modelcontextprotocol/server zod
 Node 22+, ESM. Works with SDK v2 (`@modelcontextprotocol/server`) and v1 (`@modelcontextprotocol/sdk`). There are no runtime dependencies beyond the SDK.
 
 ## How it works
+
+<img src="assets/gorilli/think.webp" alt="Gorilli mascot thinking" width="150" align="right">
 
 <p align="center">
   <img src="assets/pipeline.svg" alt="Gantry pipeline: audit, rateLimit, timeout, idempotency, approval, annotations, outputLimit, then the handler" width="100%">
@@ -116,6 +120,8 @@ Already have tools? `g.wrapExisting()` wraps everything registered on the server
 
 ## Test it like any other code
 
+<img src="assets/gorilli/sleep.webp" alt="Gorilli mascot asleep while the fake clock runs" width="150" align="right">
+
 ```ts
 import { gantryTest, gantryMatchers, clientProfiles } from "@gorilli/gantry-mcp/testing";
 expect.extend(gantryMatchers);
@@ -132,7 +138,7 @@ expect(t.events).toContainEvent({ type: "approved", tool: "delete_client" });
 await t.clock.advance(60_000); // fake clock for rate limits, TTLs and timeouts
 ```
 
-You get a real MCP client and server in process, with no network, simulated client profiles and Vitest/Jest matchers. See [testing](docs/testing.md).
+Time is fake too: `t.clock.advance()` skips a whole rate-limit window while the gorilla naps. You get a real MCP client and server in process, with no network, simulated client profiles and Vitest/Jest matchers. See [testing](docs/testing.md).
 
 ## Fast
 
@@ -177,8 +183,12 @@ Each example runs in CI as an integration test.
 
 ## Contributing
 
+<img src="assets/gorilli/wave.webp" alt="Gorilli mascot waving" width="150" align="right">
+
 Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
 [MIT](LICENSE) © Gorilli
+
+<p align="center"><img src="assets/logo.svg" alt="Gantry by Gorilli" width="64"><br><sub>Made with bananas by the Gorilli team</sub></p>

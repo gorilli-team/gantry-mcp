@@ -1,5 +1,7 @@
 # timeout
 
+<img src="../../assets/gorilli/sleep.webp" alt="Gorilli mascot asleep: calls that doze off get stopped" width="140" align="right">
+
 Stops calls that run too long.
 
 ```ts

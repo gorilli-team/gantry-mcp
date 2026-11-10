@@ -1,5 +1,7 @@
 # rateLimit
 
+<img src="../../assets/gorilli/hype.webp" alt="Gorilli mascot cheering: excitement, within limits" width="140" align="right">
+
 Caps how often a principal, a session, a tool or everyone can call.
 
 ```ts

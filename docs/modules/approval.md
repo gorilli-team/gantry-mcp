@@ -1,5 +1,7 @@
 # approval
 
+<img src="../../assets/gorilli/wave.webp" alt="Gorilli mascot raising a hand: a human says yes before anything destructive runs" width="140" align="right">
+
 Propose, a human approves, execute.
 
 ```ts

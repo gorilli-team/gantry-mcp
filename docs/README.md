@@ -1,5 +1,7 @@
 # Gantry documentation
 
+<img src="../assets/gorilli/think.webp" alt="Gorilli mascot thinking" width="140" align="right">
+
 - [Getting started](getting-started.md)
 - [The pipeline and writing middleware](pipeline.md)
 - [Error contract](errors.md)
