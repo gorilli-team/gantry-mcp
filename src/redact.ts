@@ -17,6 +17,8 @@ export const DEFAULT_REDACT: readonly RedactRule[] = [
 ];
 
 const REDACTED = "[REDACTED]";
+/** Gantry approval and decision tokens, scrubbed from any string value. */
+const TOKEN_PATTERN = /\bga[td]_[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g;
 const MAX_DEPTH = 20;
 
 function matches(key: string, rules: readonly RedactRule[]): boolean {
@@ -36,6 +38,7 @@ export function redact(value: unknown, rules: readonly RedactRule[] = DEFAULT_RE
     typeof r === "string" ? r : new RegExp(r.source, r.flags.replace("g", "")),
   );
   const walk = (v: unknown, depth: number, seen: WeakSet<object>): unknown => {
+    if (typeof v === "string") return v.replace(TOKEN_PATTERN, REDACTED);
     if (v === null || typeof v !== "object") return typeof v === "bigint" ? v.toString() : v;
     if (seen.has(v)) return "[Circular]";
     if (depth >= MAX_DEPTH) return "[Truncated]";

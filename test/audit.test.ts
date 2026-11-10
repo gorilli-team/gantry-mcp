@@ -132,6 +132,11 @@ describe("audit", () => {
 });
 
 describe("redact", () => {
+  it("scrubs Gantry tokens from string values", () => {
+    const out = redact({ text: "use gat_eyJhIjoxfQ.abc-DEF_12 now", d: "gad_x.y" });
+    expect(out).toEqual({ text: "use [REDACTED] now", d: "[REDACTED]" });
+  });
+
   it("handles nesting, arrays, cycles, regex flags and depth", () => {
     const cyclic: Record<string, unknown> = { a: 1 };
     cyclic.self = cyclic;
