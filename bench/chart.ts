@@ -12,6 +12,7 @@ const data = JSON.parse(readFileSync(new URL("./results.json", import.meta.url),
 };
 
 const rows = Object.entries(data.results);
+const avatar = `data:image/webp;base64,${readFileSync(new URL("../assets/gorilli/hype-160.webp", import.meta.url)).toString("base64")}`;
 const us = (ms: number) => ms * 1000;
 const max = Math.max(...rows.map(([, r]) => us(r.p50)));
 const niceMax = Math.ceil(max / 2) * 2 + 2;
@@ -56,16 +57,21 @@ const grid = ticks
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Pipeline overhead per module, p50 in microseconds. Full stack ${us(data.results["full stack"]!.p50).toFixed(1)} microseconds.">
 <title>Gantry pipeline overhead (p50, microseconds)</title>
 <style>
-  .bg{fill:#FFFFFF} .title{fill:#0F172A;font-weight:700;font-size:17px} .sub,.tick{fill:#475569;font-size:12px}
-  .label{fill:#1E293B;font-size:13px} .value{fill:#0F172A;font-size:12px;font-weight:600}
-  .bar{fill:#2563EB} .hl{fill:#EA580C} .grid{stroke:#E2E8F0;stroke-width:1}
+  .bg{fill:#E4E8F2} .title{fill:#141A33;font-weight:800;font-size:17px} .sub,.tick{fill:#4A5372;font-size:12px}
+  .label{fill:#141A33;font-size:13px} .value{fill:#141A33;font-size:12px;font-weight:700}
+  .bar{fill:#3557B0} .hl{fill:#D9A21B} .grid{stroke:#C9CFDF;stroke-width:1}
   @media (prefers-color-scheme: dark) {
-    .bg{fill:#0D1117} .title{fill:#F8FAFC} .sub,.tick{fill:#94A3B8} .label{fill:#E2E8F0} .value{fill:#F8FAFC}
-    .bar{fill:#3B82F6} .grid{stroke:#21262D}
+    .bg{fill:#0B0F20} .title{fill:#F5F7FC} .sub,.tick{fill:#AEB6CF} .label{fill:#E4E8F2} .value{fill:#F5F7FC}
+    .bar{fill:#4C72CF} .hl{fill:#B98410} .grid{stroke:#232B4A}
   }
   text{font-family:Inter,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
 </style>
-<rect class="bg" width="${W}" height="${H}" rx="16"/>
+<rect class="bg" width="${W}" height="${H}" rx="18"/>
+<rect x="0" y="0" width="${W}" height="8" rx="4" fill="#F2C94C"/>
+<defs><clipPath id="av"><circle cx="${W - 52}" cy="48" r="30"/></clipPath></defs>
+<circle cx="${W - 52}" cy="48" r="30" fill="#B4BACE"/>
+<image href="${avatar}" x="${W - 86}" y="14" width="68" height="68" clip-path="url(#av)"><title>Gorilli is happy about this</title></image>
+<circle cx="${W - 52}" cy="48" r="30" fill="none" stroke="#F2C94C" stroke-width="3"/>
 <text class="title" x="24" y="36">Pipeline overhead per call (p50, µs)</text>
 <text class="sub" x="24" y="58">All seven modules add ${us(data.overheadP50).toFixed(1)} µs over a bare handler. Budget: 500 µs. memoryStore, Node ${esc(data.node)}.</text>
 ${grid}

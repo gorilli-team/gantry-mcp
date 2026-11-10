@@ -1,58 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 330" width="1200" height="330" role="img" aria-label="Gantry pipeline: agent call passes audit, rateLimit, timeout, idempotency, approval, annotations and outputLimit before the handler; any module can return a refusal">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="Gantry pipeline: an agent's tool call passes audit, rateLimit, timeout, idempotency, approval, annotations and outputLimit before the handler; any module can return a refusal the agent can act on">
 <title>Gantry pipeline</title>
 <style>
-  .bg{fill:#FFFFFF} .ink{fill:#0F172A} .muted{fill:#475569} .box{fill:#F1F5F9;stroke:#CBD5E1}
-  .mod{fill:#EFF6FF;stroke:#2563EB} .modtext{fill:#1E3A8A} .accent{fill:#EA580C} .line{stroke:#334155} .ref{stroke:#EA580C}
+  .bg{fill:#E4E8F2} .ink{fill:#141A33} .muted{fill:#4A5372} .box{fill:#FFFFFF;stroke:#C5CBDD}
+  .mod{fill:#FFFFFF;stroke:#2F4FA0} .modhl{fill:#FFF7DD;stroke:#D9A21B} .modtext{fill:#141A33} .line{stroke:#4A5372} .ref{stroke:#D9A21B}
   @media (prefers-color-scheme: dark) {
-    .bg{fill:#0D1117} .ink{fill:#F8FAFC} .muted{fill:#94A3B8} .box{fill:#161B22;stroke:#30363D}
-    .mod{fill:#0F1B33;stroke:#3B82F6} .modtext{fill:#BFDBFE} .line{stroke:#94A3B8}
+    .bg{fill:#0B0F20} .ink{fill:#F5F7FC} .muted{fill:#AEB6CF} .box{fill:#161D38;stroke:#2B3560}
+    .mod{fill:#141B36;stroke:#4C72CF} .modhl{fill:#2A2410;stroke:#F2C94C} .modtext{fill:#E4E8F2} .line{stroke:#AEB6CF}
   }
-  text{font-family:Inter,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
+  text{font-family:Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif}
 </style>
 <defs>
-  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748B"/></marker>
-  <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#EA580C"/></marker>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#7A84A3"/></marker>
+  <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#D9A21B"/></marker>
+  <clipPath id="av"><circle cx="1136" cy="58" r="38"/></clipPath>
 </defs>
-<rect class="bg" width="1200" height="330" rx="16"/>
-<text class="ink" x="40" y="44" font-size="20" font-weight="700">One pipeline around every tools/call</text>
-<text class="muted" x="40" y="70" font-size="14">Each module calls next() or returns its own result. Refusals come back to the agent as tool results it can act on.</text>
-<rect class="box" x="30" y="120" width="96" height="76" rx="12"/>
-<text class="ink" x="78" y="155" font-size="16" font-weight="700" text-anchor="middle">Agent</text>
-<text class="muted" x="78" y="176" font-size="12" text-anchor="middle">tools/call</text>
-<rect class="mod" x="150" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
-<text class="modtext" x="209.0" y="154" font-size="14" font-weight="700" text-anchor="middle">audit</text>
-<text class="muted" x="209.0" y="175" font-size="12" text-anchor="middle">log</text>
-<rect class="mod" x="280" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
-<text class="modtext" x="339.0" y="154" font-size="14" font-weight="700" text-anchor="middle">rateLimit</text>
-<text class="muted" x="339.0" y="175" font-size="12" text-anchor="middle">cap</text>
-<rect class="mod" x="410" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
-<text class="modtext" x="469.0" y="154" font-size="14" font-weight="700" text-anchor="middle">timeout</text>
-<text class="muted" x="469.0" y="175" font-size="12" text-anchor="middle">stop</text>
-<rect class="mod" x="540" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
-<text class="modtext" x="599.0" y="154" font-size="14" font-weight="700" text-anchor="middle">idempotency</text>
-<text class="muted" x="599.0" y="175" font-size="12" text-anchor="middle">dedupe</text>
-<rect class="mod" x="670" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
-<text class="modtext" x="729.0" y="154" font-size="14" font-weight="700" text-anchor="middle">approval</text>
-<text class="muted" x="729.0" y="175" font-size="12" text-anchor="middle">ask</text>
-<rect class="mod" x="800" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
-<text class="modtext" x="859.0" y="154" font-size="14" font-weight="700" text-anchor="middle">annotations</text>
-<text class="muted" x="859.0" y="175" font-size="12" text-anchor="middle">guard</text>
-<rect class="mod" x="930" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
-<text class="modtext" x="989.0" y="154" font-size="14" font-weight="700" text-anchor="middle">outputLimit</text>
-<text class="muted" x="989.0" y="175" font-size="12" text-anchor="middle">trim</text>
-<rect class="box" x="1068" y="120" width="102" height="76" rx="12"/>
-<text class="ink" x="1119.0" y="155" font-size="16" font-weight="700" text-anchor="middle">Handler</text>
-<text class="muted" x="1119.0" y="176" font-size="12" text-anchor="middle">your tool</text>
-<line class="line" x1="127" y1="158" x2="148" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<line class="line" x1="269" y1="158" x2="278" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<line class="line" x1="399" y1="158" x2="408" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<line class="line" x1="529" y1="158" x2="538" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<line class="line" x1="659" y1="158" x2="668" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<line class="line" x1="789" y1="158" x2="798" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<line class="line" x1="919" y1="158" x2="928" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<line class="line" x1="1049" y1="158" x2="1066" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
-<path class="ref" d="M729.0 198 V250 H78 V200" fill="none" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#r)"/>
-<rect x="723.0" y="244" width="12" height="12" rx="3" class="accent"/>
-<text class="ink" x="200" y="278" font-size="14" font-weight="600">Refusal: isError + structuredContent.gantry.code</text>
-<text class="muted" x="200" y="300" font-size="13">APPROVAL_REQUIRED, RATE_LIMITED, TIMEOUT, DUPLICATE_IN_FLIGHT, ANNOTATION_VIOLATION, UNAVAILABLE ...</text>
+<rect class="bg" width="1200" height="340" rx="18"/>
+<rect x="0" y="0" width="1200" height="8" rx="4" fill="#F2C94C"/>
+<text class="ink" x="40" y="54" font-size="21" font-weight="800">One pipeline around every tools/call</text>
+<text class="muted" x="40" y="82" font-size="14">Each module calls next() or returns its own result. Refusals come back to the agent as tool results it can act on.</text>
+<circle cx="1136" cy="58" r="38" fill="#B4BACE"/>
+<image href="data:image/webp;base64,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" x="1094" y="18" width="84" height="84" clip-path="url(#av)"/>
+<circle cx="1136" cy="58" r="38" fill="none" stroke="#F2C94C" stroke-width="3"/>
+<rect class="box" x="30" y="136" width="96" height="76" rx="14"/>
+<text class="ink" x="78" y="170" font-size="16" font-weight="700" text-anchor="middle">Agent</text>
+<text class="muted" x="78" y="191" font-size="12" text-anchor="middle">tools/call</text>
+<rect class="mod" x="150" y="136" width="118" height="76" rx="14" stroke-width="1.5"/>
+<text class="modtext" x="209" y="170" font-size="14" font-weight="700" text-anchor="middle">audit</text>
+<text class="muted" x="209" y="191" font-size="12" text-anchor="middle">log it</text>
+<rect class="mod" x="280" y="136" width="118" height="76" rx="14" stroke-width="1.5"/>
+<text class="modtext" x="339" y="170" font-size="14" font-weight="700" text-anchor="middle">rateLimit</text>
+<text class="muted" x="339" y="191" font-size="12" text-anchor="middle">cap it</text>
+<rect class="mod" x="410" y="136" width="118" height="76" rx="14" stroke-width="1.5"/>
+<text class="modtext" x="469" y="170" font-size="14" font-weight="700" text-anchor="middle">timeout</text>
+<text class="muted" x="469" y="191" font-size="12" text-anchor="middle">stop it</text>
+<rect class="mod" x="540" y="136" width="118" height="76" rx="14" stroke-width="1.5"/>
+<text class="modtext" x="599" y="170" font-size="14" font-weight="700" text-anchor="middle">idempotency</text>
+<text class="muted" x="599" y="191" font-size="12" text-anchor="middle">once only</text>
+<rect class="modhl" x="670" y="136" width="118" height="76" rx="14" stroke-width="1.5"/>
+<text class="modtext" x="729" y="170" font-size="14" font-weight="700" text-anchor="middle">approval</text>
+<text class="muted" x="729" y="191" font-size="12" text-anchor="middle">ask a human</text>
+<rect class="mod" x="800" y="136" width="118" height="76" rx="14" stroke-width="1.5"/>
+<text class="modtext" x="859" y="170" font-size="14" font-weight="700" text-anchor="middle">annotations</text>
+<text class="muted" x="859" y="191" font-size="12" text-anchor="middle">guard it</text>
+<rect class="mod" x="930" y="136" width="118" height="76" rx="14" stroke-width="1.5"/>
+<text class="modtext" x="989" y="170" font-size="14" font-weight="700" text-anchor="middle">outputLimit</text>
+<text class="muted" x="989" y="191" font-size="12" text-anchor="middle">trim it</text>
+<rect class="box" x="1068" y="136" width="102" height="76" rx="14"/>
+<text class="ink" x="1119" y="170" font-size="16" font-weight="700" text-anchor="middle">Handler</text>
+<text class="muted" x="1119" y="191" font-size="12" text-anchor="middle">your tool</text>
+<line class="line" x1="127" y1="174" x2="148" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="269" y1="174" x2="278" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="399" y1="174" x2="408" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="529" y1="174" x2="538" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="659" y1="174" x2="668" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="789" y1="174" x2="798" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="919" y1="174" x2="928" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="1049" y1="174" x2="1066" y2="174" stroke-width="1.5" marker-end="url(#a)"/>
+<path class="ref" d="M729 214 V268 H78 V216" fill="none" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#r)"/>
+<text class="ink" x="200" y="296" font-size="14" font-weight="700">Refusal: isError + structuredContent.gantry.code</text>
+<text class="muted" x="200" y="318" font-size="13">APPROVAL_REQUIRED, RATE_LIMITED, TIMEOUT, DUPLICATE_IN_FLIGHT, ANNOTATION_VIOLATION, UNAVAILABLE ...</text>
 </svg>
