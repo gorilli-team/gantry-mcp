@@ -113,9 +113,14 @@ export class Gantry {
         throw new GantryConfigError("gantry: every `use` entry must be a middleware function");
     }
     if (options.onEvent) this.#listeners.add(options.onEvent);
+    const self = this;
     const api: GantryApi = {
-      store: this.#store,
-      clock: this.#clock,
+      get store() {
+        return self.#store;
+      },
+      get clock() {
+        return self.#clock;
+      },
       on: (l) => this.on(l),
       logger: this.logger,
     };
