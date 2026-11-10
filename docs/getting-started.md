@@ -13,7 +13,7 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { gantry } from "@gorilli/gantry-mcp";
 
 const server = new McpServer({ name: "crm", version: "1.0.0" });
-const g = gantry(server, { use: gantry.recommended({ secret: process.env.GANTRY_SECRET }) });
+const g = gantry(server, { use: gantry.recommended() });
 ```
 
 Then register tools with `g.tool()` instead of `server.registerTool()`. The signature is the same:
