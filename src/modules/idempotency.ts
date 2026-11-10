@@ -41,13 +41,14 @@ export function idempotency(options: IdempotencyOptions = {}): Middleware {
   const scope = options.scope ?? "principal";
   const prefix = options.prefix ?? "gantry:idem";
   const applies = options.onlyFor ?? ((tool: ToolInfo) => tool.annotations.readOnlyHint !== true);
-  const inFlight = new Map<string, Promise<CallToolResult>>();
+  const inFlight = new Map<string, { argsHash: string; running: Promise<CallToolResult> }>();
 
   const scopeId = (ctx: CallContext) =>
     scope === "global"
       ? "*"
       : scope === "session"
-        ? `s:${ctx.sessionId ?? `p:${ctx.principal}`}`
+        ? // The principal is part of the session scope so session ids cannot collide across callers.
+          `s:${ctx.principal}\u0000${ctx.sessionId ?? ""}`
         : `p:${ctx.principal}`;
 
   const replay = (ctx: CallContext, stored: StoredResult): CallToolResult => {
@@ -98,7 +99,7 @@ export function idempotency(options: IdempotencyOptions = {}): Middleware {
             const raced = (await ctx.store.get(key)) as StoredResult | undefined;
             if (raced) return replay(ctx, raced);
             const running = next();
-            inFlight.set(key, running);
+            inFlight.set(key, { argsHash: ctx.argsHash, running });
             const result = await running;
             if (!result.isError) {
               try {
@@ -127,8 +128,12 @@ export function idempotency(options: IdempotencyOptions = {}): Middleware {
         // Someone else holds the lock: wait for their result.
         const local = inFlight.get(key);
         if (local) {
-          const result = await local.catch(() => undefined);
-          if (result && !result.isError) return replay(ctx, { argsHash: ctx.argsHash, result });
+          // Same key, different arguments: refuse now rather than hand back another call's result.
+          if (local.argsHash !== ctx.argsHash) {
+            return replay(ctx, { argsHash: local.argsHash, result: { content: [] } });
+          }
+          const result = await local.running.catch(() => undefined);
+          if (result && !result.isError) return replay(ctx, { argsHash: local.argsHash, result });
           continue;
         }
         if (ctx.clock.now() >= deadline || ctx.signal.aborted) {

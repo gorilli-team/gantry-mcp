@@ -146,6 +146,25 @@ describe("idempotency", () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  it("refuses a concurrent call that reuses a key with different arguments", async () => {
+    const { g } = setup({ scope: "global" });
+    let release!: () => void;
+    const handler = vi.fn(
+      ({ to }: { to: string }) =>
+        new Promise<CallToolResult>((r) => (release = () => r(ok(`secret result for ${to}`)))),
+    );
+    g.tool("pay", { inputSchema: { to: z.string() } }, handler);
+    const t = await gantryTest(g, { clock: false });
+    const first = t.call("pay", { to: "alice", _idempotencyKey: "K1" });
+    await new Promise((r) => setTimeout(r, 20));
+    const second = await t.call("pay", { to: "mallory", _idempotencyKey: "K1" });
+    expect(second).toBeGantryError("IDEMPOTENCY_CONFLICT");
+    expect(JSON.stringify(second)).not.toContain("secret result");
+    release();
+    expect(txt(await first)).toBe("secret result for alice");
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
   it("returns DUPLICATE_IN_FLIGHT when the first call takes too long", async () => {
     const store = memoryStore();
     const clock = fakeClock();
