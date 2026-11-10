@@ -15,6 +15,15 @@ const UNITS: Record<string, number> = {
   day: 86_400_000,
 };
 
+/** Config strings are short; anything longer is a mistake (and never worth parsing). */
+const MAX_INPUT = 64;
+
+/** "30s" -> ["30s", "30", "s"]. Whitespace is trimmed first so the pattern stays linear. */
+function splitAmount(input: string): RegExpExecArray | null {
+  if (typeof input !== "string" || input.length > MAX_INPUT) return null;
+  return /^(\d+(?:\.\d+)?)([a-z]+)$/i.exec(input.trim().replace(/^(\d+(?:\.\d+)?) +/, "$1"));
+}
+
 export function parseDuration(input: Duration | string, label = "duration"): number {
   if (typeof input === "number") {
     if (!Number.isFinite(input) || input <= 0) {
@@ -22,7 +31,7 @@ export function parseDuration(input: Duration | string, label = "duration"): num
     }
     return input;
   }
-  const match = /^\s*(\d+(?:\.\d+)?)\s*([a-z]+)\s*$/i.exec(input);
+  const match = splitAmount(input);
   const unit = match ? UNITS[match[2]!.toLowerCase()] : undefined;
   if (!match || unit === undefined) {
     throw new GantryConfigError(
@@ -49,11 +58,17 @@ export function parseRate(input: Rate, label = "rate"): ParsedRate {
     }
     return { limit: input.limit, windowMs: parseDuration(input.windowMs, label) };
   }
-  const match = /^\s*(\d+)\s*\/\s*(\d+)?\s*([a-z]+)\s*$/i.exec(input);
-  if (!match) throw new GantryConfigError(`Invalid ${label} "${input}". Use e.g. "60/min".`);
-  const limit = Number(match[1]);
-  const count = match[2] ? Number(match[2]) : 1;
-  const unit = UNITS[match[3]!.toLowerCase()];
+  // Split first, then match each short, whitespace-free part: no regex here can backtrack.
+  const parts = typeof input === "string" && input.length <= MAX_INPUT ? input.split("/") : [];
+  const limitPart = parts[0]?.trim() ?? "";
+  const windowPart = parts[1]?.trim() ?? "";
+  const windowMatch = /^(\d*)([a-z]+)$/i.exec(windowPart);
+  if (parts.length !== 2 || !/^\d+$/.test(limitPart) || !windowMatch) {
+    throw new GantryConfigError(`Invalid ${label} "${input}". Use e.g. "60/min".`);
+  }
+  const limit = Number(limitPart);
+  const count = windowMatch[1] ? Number(windowMatch[1]) : 1;
+  const unit = UNITS[windowMatch[2]!.toLowerCase()];
   if (unit === undefined || limit <= 0 || count <= 0) {
     throw new GantryConfigError(`Invalid ${label} "${input}". Use e.g. "60/min".`);
   }

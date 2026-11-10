@@ -36,7 +36,25 @@ describe("parseRate", () => {
     expect(parseRate({ limit: 3, windowMs: 1000 })).toEqual({ limit: 3, windowMs: 1000 });
   });
 
-  it.each(["60", "0/min", "x/min", "5/fortnight"])("rejects %s", (input) => {
+  it("parses adversarial input in linear time (CodeQL polynomial regex)", () => {
+    const started = performance.now();
+    for (const bad of [
+      `9/${" ".repeat(50_000)}`,
+      `${" ".repeat(50_000)}9`,
+      `9${" ".repeat(50_000)}s`,
+    ]) {
+      expect(() => parseRate(bad)).toThrow(GantryConfigError);
+      expect(() => parseDuration(bad as never)).toThrow(GantryConfigError);
+    }
+    expect(performance.now() - started).toBeLessThan(50);
+  });
+
+  it("accepts spaces around the parts", () => {
+    expect(parseRate(" 60 / min ")).toEqual({ limit: 60, windowMs: 60_000 });
+    expect(parseDuration(" 30 s " as never)).toBe(30_000);
+  });
+
+  it.each(["60", "0/min", "x/min", "5/fortnight", "1/2/min", "5/ 2 m"])("rejects %s", (input) => {
     expect(() => parseRate(input)).toThrow(GantryConfigError);
   });
   it("rejects bad objects", () => {
