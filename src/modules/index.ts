@@ -1,3 +1,4 @@
+export { type AnnotationsOptions, annotations } from "./annotations.js";
 export {
   APPROVAL_TOKEN_ARG,
   type ApprovalMiddleware,
