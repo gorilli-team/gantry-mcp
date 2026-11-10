@@ -160,7 +160,7 @@ export class Gantry {
         finalConfig = { ...config, inputSchema: withReservedArgs(config.inputSchema, reserved) };
       } else {
         this.logger.warn(
-          `Tool "${name}": SDK v1 cannot extend input schemas. Declare ${Object.keys(reserved).join(", ")} as optional string fields to use them.`,
+          `Tool "${name}": SDK v1 cannot extend input schemas. Declare ${Object.keys(reserved).join(", ")} as optional string fields (or send them in request _meta as "gantry/<name>").`,
         );
       }
     }
@@ -270,8 +270,27 @@ export class Gantry {
       return (await invoke(ctx, sdkCtx)) as CallToolResult;
     };
     const pipeline = compose(this.middlewares, handler);
+    const reservedNames = Object.keys(this.#reservedArgs(info));
 
-    return async (args, rawCtx) => {
+    return async (rawArgs, rawCtx) => {
+      // Reserved arguments declared in the tool's own schema (SDK v1, wrapExisting)
+      // arrive inside args: move them out so handlers and argsHash never see them.
+      const fromArgs: Record<string, unknown> = {};
+      let args = rawArgs;
+      const viaWrapper = !!rawArgs && typeof rawArgs === "object" && reservedValues.has(rawArgs);
+      if (!viaWrapper && rawArgs && typeof rawArgs === "object" && !Array.isArray(rawArgs)) {
+        const present = reservedNames.filter((k) => k in rawArgs);
+        if (present.length > 0) {
+          const copy: Record<string, unknown> = { ...(rawArgs as Record<string, unknown>) };
+          for (const key of present) {
+            const value = copy[key];
+            delete copy[key];
+            if (typeof value === "string" && value.length > 0 && value.length <= 4096)
+              fromArgs[key] = value;
+          }
+          args = copy;
+        }
+      }
       const sdk = (rawCtx ?? {}) as SdkContextLike;
       const requestId = randomUUID();
       // An empty session id means no session.
@@ -279,7 +298,8 @@ export class Gantry {
       const meta = sdk.mcpReq?._meta ?? sdk._meta;
       const reserved = {
         ...reservedFromMeta(meta),
-        ...((args && typeof args === "object" && reservedValues.get(args)) || {}),
+        ...fromArgs,
+        ...((rawArgs && typeof rawArgs === "object" && reservedValues.get(rawArgs)) || {}),
       };
       const req: PrincipalRequest = {
         authInfo: sdk.http?.authInfo ?? sdk.authInfo,

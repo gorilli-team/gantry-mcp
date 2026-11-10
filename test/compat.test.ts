@@ -99,6 +99,48 @@ describe("SDK v1 compatibility", () => {
     expect(seen?.args).toEqual({ msg: "hi" });
   });
 
+  it("reads declared reserved fields on v1 and keeps them out of args", async () => {
+    const server = new McpServerV1({ name: "v1", version: "1" });
+    let seen: CallContext | undefined;
+    const secret = "x9F!kq2LmP0zR7vB4nT8wY1cH6jD3sGa";
+    const g = gantry(server as never, {
+      logger: { warn: () => {}, error: () => {} },
+      use: [
+        async (ctx, next) => {
+          seen = ctx;
+          return next();
+        },
+        approval({ mode: "token", secret }),
+      ],
+    });
+    let handlerArgs: unknown;
+    g.tool(
+      "drop",
+      {
+        inputSchema: { id: z.string(), _approvalToken: z.string().optional() },
+        annotations: { destructiveHint: true },
+      },
+      async (args: unknown) => {
+        handlerArgs = args;
+        return ok("dropped");
+      },
+    );
+    const client = await connectV1(server);
+    const first = (await client.callTool({
+      name: "drop",
+      arguments: { id: "1" },
+    })) as CallToolResult;
+    const token = String(getGantryPayload(first)?.approvalToken);
+    const hashBefore = seen?.argsHash;
+    const second = (await client.callTool({
+      name: "drop",
+      arguments: { id: "1", _approvalToken: token },
+    })) as CallToolResult;
+    expect(txt(second)).toBe("dropped");
+    expect(seen?.argsHash).toBe(hashBefore);
+    expect(handlerArgs).toEqual({ id: "1" });
+  });
+
   it("elicits through the v1 server API", async () => {
     const server = new McpServerV1({ name: "v1", version: "1" });
     const g = gantry(server as never, { use: [approval({})] });
