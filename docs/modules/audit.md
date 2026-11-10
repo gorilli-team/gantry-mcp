@@ -4,12 +4,12 @@ One structured event per stage of every call, redacted before your sink sees it.
 
 ```ts
 audit({
-  sink: (event) => logger.info(event),   // may be async
-  redact: ["ssn", /card/i],              // added to the defaults
-  includeArgs: false,                    // default
-  includeResult: false,                  // default
-  failClosed: true,                      // default
-})
+  sink: (event) => logger.info(event), // may be async
+  redact: ["ssn", /card/i], // added to the defaults
+  includeArgs: false, // default
+  includeResult: false, // default
+  failClosed: true, // default
+});
 ```
 
 Events: `received`, `refused` (with `code`), `approved`, `executed` (with `durationMs`), `failed`, plus anything other modules emit (`rate_limited`, `timeout`, `replayed`, `approval_requested`, ...).

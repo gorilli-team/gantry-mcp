@@ -5,11 +5,11 @@ Caps how often a principal, a session, a tool or everyone can call.
 ```ts
 rateLimit({
   perPrincipal: "60/min",
-  perTool: { send_email: "10/hour" },   // counted per principal
+  perTool: { send_email: "10/hour" }, // counted per principal
   perSession: "300/hour",
   global: "1000/min",
   key: { by: (ctx) => ctx.client.name, rate: "100/min", name: "client" },
-})
+});
 ```
 
 Rates are `"<limit>/<window>"`: `"5/s"`, `"60/min"`, `"10/hour"`, `"100/day"`, `"10/5m"`.

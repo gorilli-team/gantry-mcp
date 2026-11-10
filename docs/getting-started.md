@@ -19,22 +19,32 @@ const g = gantry(server, { use: gantry.recommended({ secret: process.env.GANTRY_
 Then register tools with `g.tool()` instead of `server.registerTool()`. The signature is the same:
 
 ```ts
-g.tool("delete_client", {
-  description: "Delete a client and all its data",
-  inputSchema: z.object({ clientId: z.string() }),
-  annotations: { destructiveHint: true },
-}, async ({ clientId }) => {
-  await db.clients.delete(clientId);
-  return { content: [{ type: "text", text: "Deleted" }] };
-});
+g.tool(
+  "delete_client",
+  {
+    description: "Delete a client and all its data",
+    inputSchema: z.object({ clientId: z.string() }),
+    annotations: { destructiveHint: true },
+  },
+  async ({ clientId }) => {
+    await db.clients.delete(clientId);
+    return { content: [{ type: "text", text: "Deleted" }] };
+  },
+);
 ```
 
 ## Already have tools?
 
 ```ts
-server.registerTool("legacy", { /* ... */ }, handler);
-g.wrapExisting();            // wraps every tool registered so far
-g.wrapExisting(["legacy"]);  // or just some
+server.registerTool(
+  "legacy",
+  {
+    /* ... */
+  },
+  handler,
+);
+g.wrapExisting(); // wraps every tool registered so far
+g.wrapExisting(["legacy"]); // or just some
 ```
 
 `wrapExisting` cannot add Gantry's reserved arguments (`_approvalToken`, `_idempotencyKey`) to existing schemas. Clients can send them in request `_meta` as `gantry/approvalToken` and `gantry/idempotencyKey`, or you can declare them as optional string fields.

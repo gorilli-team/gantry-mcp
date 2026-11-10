@@ -5,11 +5,11 @@ Keeps huge results out of the agent's context.
 ```ts
 outputLimit({
   maxTokens: 8_000,
-  strategy: "truncate-with-notice",   // or "error" | "summarize"
+  strategy: "truncate-with-notice", // or "error" | "summarize"
   summarize: async (text, ctx) => llm.summarize(text),
   perTool: { search_logs: 2_000 },
-  estimate: (text) => Math.ceil(text.length / 4),   // default
-})
+  estimate: (text) => Math.ceil(text.length / 4), // default
+});
 ```
 
 - Counts text blocks, embedded resource text and `structuredContent`. Images and audio are kept and not counted.

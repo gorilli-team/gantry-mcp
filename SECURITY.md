@@ -8,20 +8,20 @@ We aim to acknowledge reports within 3 business days and to ship a fix for confi
 
 ## Supported versions
 
-| Version | Supported |
-|---|---|
-| latest 0.x minor | yes |
-| older | no |
+| Version          | Supported |
+| ---------------- | --------- |
+| latest 0.x minor | yes       |
+| older            | no        |
 
 ## Trust model
 
-| Party | Trust |
-|---|---|
-| Server operator (your code, your config, the `secret`) | trusted |
-| Human approver (elicitation answers, out-of-band decisions) | trusted |
-| Agent / model, tool arguments, request `_meta`, reserved arguments | **untrusted**; may be prompt-injected |
-| MCP client | trusted to relay elicitation honestly; untrusted for everything it forwards from the model |
-| Store (Redis, MongoDB) | trusted for integrity; Gantry fails closed when it is unavailable |
+| Party                                                              | Trust                                                                                      |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| Server operator (your code, your config, the `secret`)             | trusted                                                                                    |
+| Human approver (elicitation answers, out-of-band decisions)        | trusted                                                                                    |
+| Agent / model, tool arguments, request `_meta`, reserved arguments | **untrusted**; may be prompt-injected                                                      |
+| MCP client                                                         | trusted to relay elicitation honestly; untrusted for everything it forwards from the model |
+| Store (Redis, MongoDB)                                             | trusted for integrity; Gantry fails closed when it is unavailable                          |
 
 Principles that apply to every module:
 
@@ -35,17 +35,17 @@ Principles that apply to every module:
 
 ### approval
 
-| Threat | Mitigation |
-|---|---|
-| Agent forges a token | HMAC-SHA256 with a purpose-derived key from a secret of 32+ characters; constant-time comparison. |
-| Agent replays a token | Proposals are consumed atomically (`Store.consume`); a token works once. Concurrency tested. |
-| Agent swaps arguments after approval | Token and out-of-band decisions are bound to `argsHash` (SHA-256 of RFC 8785 canonical JSON), tool name, principal and session. |
-| Another principal or session reuses an approval | Principal and session are part of the binding. |
-| Stale approval | Default TTL 5 minutes, enforced by expiry in the signed payload and store TTL. |
-| Burning a valid token with forged attempts | Signature and binding are checked before consumption. |
-| Token for one purpose used for another | Approval tokens and decision tokens use separate derived keys and prefixes. |
-| Misleading preview (control characters, RTL override) | Previews are sanitized and length-capped; notifiers must still escape for their format. |
-| Approval channel down | Refusal, never a silent pass. No available mode means `APPROVAL_REQUIRED`. |
+| Threat                                                | Mitigation                                                                                                                      |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Agent forges a token                                  | HMAC-SHA256 with a purpose-derived key from a secret of 32+ characters; constant-time comparison.                               |
+| Agent replays a token                                 | Proposals are consumed atomically (`Store.consume`); a token works once. Concurrency tested.                                    |
+| Agent swaps arguments after approval                  | Token and out-of-band decisions are bound to `argsHash` (SHA-256 of RFC 8785 canonical JSON), tool name, principal and session. |
+| Another principal or session reuses an approval       | Principal and session are part of the binding.                                                                                  |
+| Stale approval                                        | Default TTL 5 minutes, enforced by expiry in the signed payload and store TTL.                                                  |
+| Burning a valid token with forged attempts            | Signature and binding are checked before consumption.                                                                           |
+| Token for one purpose used for another                | Approval tokens and decision tokens use separate derived keys and prefixes.                                                     |
+| Misleading preview (control characters, RTL override) | Previews are sanitized and length-capped; notifiers must still escape for their format.                                         |
+| Approval channel down                                 | Refusal, never a silent pass. No available mode means `APPROVAL_REQUIRED`.                                                      |
 
 **What `token` mode does not protect against.** Token mode proves that the exact call was proposed and then confirmed with identical arguments within the TTL. It does **not** prove a human saw or approved it: the token is returned to the agent, and an agent (or prompt injection) can pass it straight back. It is meaningful only when the client shows tool calls to the user and asks before running them, or as a deliberate two-step speed bump. For real human-in-the-loop guarantees use `elicit` (the client asks the human) or `out-of-band` (the agent never sees a token). If you configure `fallback: ["token"]`, clients without elicitation get the weaker guarantee.
 
@@ -55,32 +55,32 @@ Principles that apply to every module:
 
 ### idempotency
 
-| Threat | Mitigation |
-|---|---|
-| Reading another principal's stored result | Keys include the scope (principal by default) and are hashed. |
+| Threat                                                                 | Mitigation                                                                  |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Reading another principal's stored result                              | Keys include the scope (principal by default) and are hashed.               |
 | Replaying a result for different arguments under the same explicit key | Stored results carry `argsHash`; a mismatch returns `IDEMPOTENCY_CONFLICT`. |
-| Duplicate execution under concurrency | Store lock per key; duplicates wait, then get `DUPLICATE_IN_FLIGHT`. |
-| Caching failures | Only successful results are stored. |
+| Duplicate execution under concurrency                                  | Store lock per key; duplicates wait, then get `DUPLICATE_IN_FLIGHT`.        |
+| Caching failures                                                       | Only successful results are stored.                                         |
 
 Stored results live in the store for the TTL: treat the store as holding tool output. With `scope: "global"`, results are shared across principals by design; use it only for tools whose output is not per user.
 
 ### rateLimit
 
-| Threat | Mitigation |
-|---|---|
-| Key injection through principal or session strings | Identifiers are URL-encoded into keys. |
-| Exhausting quota with refused calls | Refusals roll back their increments. |
-| Bypass across instances | Atomic `incr` on a shared store; Gantry warns when `memoryStore` runs behind HTTP. |
+| Threat                                             | Mitigation                                                                         |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Key injection through principal or session strings | Identifiers are URL-encoded into keys.                                             |
+| Exhausting quota with refused calls                | Refusals roll back their increments.                                               |
+| Bypass across instances                            | Atomic `incr` on a shared store; Gantry warns when `memoryStore` runs behind HTTP. |
 
 A sliding window is an estimate: short bursts at window edges can exceed the nominal rate slightly.
 
 ### audit
 
-| Threat | Mitigation |
-|---|---|
-| Secrets in logs | Default redaction list always applies; args and results are opt-in; tokens scrubbed from strings. |
-| Silent loss of audit trail | `failClosed` (default) refuses calls when the `received` event cannot be recorded. |
-| Log injection | Events are structured objects; sinks should serialize them as JSON, not interpolate. |
+| Threat                     | Mitigation                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------- |
+| Secrets in logs            | Default redaction list always applies; args and results are opt-in; tokens scrubbed from strings. |
+| Silent loss of audit trail | `failClosed` (default) refuses calls when the `received` event cannot be recorded.                |
+| Log injection              | Events are structured objects; sinks should serialize them as JSON, not interpolate.              |
 
 ### timeout
 

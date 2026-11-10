@@ -3,7 +3,7 @@
 Makes tool annotations mean something.
 
 ```ts
-annotations({ enforce: true, strict: true })
+annotations({ enforce: true, strict: true });
 ```
 
 **enforce** (default on). In a tool marked `readOnlyHint: true`:
@@ -17,7 +17,7 @@ A blocked write returns `ANNOTATION_VIOLATION`.
 const g = gantry(server, { clients: { db }, use: [annotations()] });
 g.tool("list_clients", { annotations: { readOnlyHint: true } }, async (ctx) => {
   const db = ctx.gantry.clients.db as Db;
-  return text(JSON.stringify(await db.clients.find()));   // allowed
+  return text(JSON.stringify(await db.clients.find())); // allowed
 });
 ```
 

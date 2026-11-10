@@ -4,15 +4,17 @@ Propose, a human approves, execute.
 
 ```ts
 approval({
-  when: (tool) => tool.annotations.destructiveHint === true,   // default
-  mode: "elicit",                     // "elicit" | "token" | "out-of-band"
-  fallback: ["token"],                // tried in order when the mode is unavailable
-  secret: process.env.GANTRY_SECRET,  // required for token and out-of-band
+  when: (tool) => tool.annotations.destructiveHint === true, // default
+  mode: "elicit", // "elicit" | "token" | "out-of-band"
+  fallback: ["token"], // tried in order when the mode is unavailable
+  secret: process.env.GANTRY_SECRET, // required for token and out-of-band
   ttl: "5m",
   preview: (ctx) => `Delete client ${ctx.args.clientId}`,
-  notifier: async (request) => { /* out-of-band only */ },
-  wait: "0s",                         // out-of-band: wait for the decision inside the call
-})
+  notifier: async (request) => {
+    /* out-of-band only */
+  },
+  wait: "0s", // out-of-band: wait for the decision inside the call
+});
 ```
 
 ## Modes
@@ -28,7 +30,9 @@ Token mode proves the call was proposed and then confirmed with identical argume
 ```ts
 const appr = approval({ mode: "out-of-band", secret, notifier });
 gantry(server, { use: [appr] });
-app.post("/approve", async (req, res) => res.json(await appr.decide(req.body.token, { by: req.user.email })));
+app.post("/approve", async (req, res) =>
+  res.json(await appr.decide(req.body.token, { by: req.user.email })),
+);
 ```
 
 ## Previews

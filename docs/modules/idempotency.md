@@ -4,11 +4,11 @@ Agents retry. This makes sure a retried write does not run twice.
 
 ```ts
 idempotency({
-  ttl: "24h",                 // how long results are replayed
-  scope: "principal",         // or "session" | "global"
-  onlyFor: (tool) => !tool.annotations.readOnlyHint,   // default
-  waitFor: "30s",             // how long a duplicate waits for the first call
-})
+  ttl: "24h", // how long results are replayed
+  scope: "principal", // or "session" | "global"
+  onlyFor: (tool) => !tool.annotations.readOnlyHint, // default
+  waitFor: "30s", // how long a duplicate waits for the first call
+});
 ```
 
 - The same scope + tool + `argsHash` within the TTL returns the stored result, marked `_meta["gantry/replayed"]`.

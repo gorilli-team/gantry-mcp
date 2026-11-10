@@ -9,7 +9,10 @@ import { gantryMatchers, gantryTest, clientProfiles } from "@gorilli/gantry-mcp/
 expect.extend(gantryMatchers);
 
 it("asks before deleting and replays retries", async () => {
-  const t = await gantryTest(g, { principal: "alice", clientCapabilities: clientProfiles.elicitation });
+  const t = await gantryTest(g, {
+    principal: "alice",
+    clientCapabilities: clientProfiles.elicitation,
+  });
 
   t.elicitation.respond({ action: "accept", content: { approve: true } });
   const res = await t.call("delete_client", { clientId: "c1" });
@@ -31,7 +34,8 @@ For TypeScript, augment your test runner's matcher types:
 ```ts
 import type { GantryMatchers } from "@gorilli/gantry-mcp/testing";
 declare module "vitest" {
-  interface Matchers<R extends void | Promise<void> = void | Promise<void>, T = unknown> extends GantryMatchers<R> {}
+  interface Matchers<R extends void | Promise<void> = void | Promise<void>, T = unknown>
+    extends GantryMatchers<R> {}
 }
 ```
 
