@@ -1,0 +1,105 @@
+{
+  "name": "@gorilli/gantry-mcp",
+  "version": "0.0.0",
+  "description": "Production middleware for MCP servers: approval, idempotency, rate limits, audit, timeouts, output limits and annotation enforcement around every tool call.",
+  "license": "MIT",
+  "type": "module",
+  "author": "luduvigo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gorilli-team/gantry-mcp.git"
+  },
+  "homepage": "https://github.com/gorilli-team/gantry-mcp#readme",
+  "bugs": "https://github.com/gorilli-team/gantry-mcp/issues",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "middleware",
+    "ai-agents",
+    "security",
+    "human-in-the-loop"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./modules": {
+      "types": "./dist/src/modules/index.d.ts",
+      "default": "./dist/src/modules/index.js"
+    },
+    "./modules/*": {
+      "types": "./dist/src/modules/*.d.ts",
+      "default": "./dist/src/modules/*.js"
+    },
+    "./testing": {
+      "types": "./dist/src/testing/index.d.ts",
+      "default": "./dist/src/testing/index.js"
+    },
+    "./stores/redis": {
+      "types": "./dist/stores/redis.d.ts",
+      "default": "./dist/stores/redis.js"
+    },
+    "./stores/mongodb": {
+      "types": "./dist/stores/mongodb.d.ts",
+      "default": "./dist/stores/mongodb.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "bench": "node --experimental-strip-types bench/pipeline.bench.ts",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "ioredis": "^5.0.0 || ^6.0.0",
+    "mongodb": "^6.0.0 || ^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@modelcontextprotocol/server": {
+      "optional": true
+    },
+    "@modelcontextprotocol/sdk": {
+      "optional": true
+    },
+    "ioredis": {
+      "optional": true
+    },
+    "mongodb": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@modelcontextprotocol/server": "2.4.0",
+    "@types/node": "24.19.2",
+    "@vitest/coverage-v8": "5.1.0",
+    "fast-check": "4.10.2",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0",
+    "zod": "4.6.7"
+  }
+}
