@@ -46,7 +46,13 @@ export function redact(value: unknown, rules: readonly RedactRule[] = DEFAULT_RE
     if (Array.isArray(v)) return v.map((item) => walk(item, depth + 1, seen));
     const out: Record<string, unknown> = {};
     for (const [k, inner] of Object.entries(v)) {
-      out[k] = matches(k, safeRules) ? REDACTED : walk(inner, depth + 1, seen);
+      // defineProperty keeps keys such as "__proto__" as plain data in the audit record.
+      Object.defineProperty(out, k, {
+        value: matches(k, safeRules) ? REDACTED : walk(inner, depth + 1, seen),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     }
     return out;
   };

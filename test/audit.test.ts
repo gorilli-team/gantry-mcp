@@ -132,6 +132,14 @@ describe("audit", () => {
 });
 
 describe("redact", () => {
+  it("keeps __proto__ keys as data", () => {
+    const input = JSON.parse('{"a":1,"__proto__":{"evil":"payload"}}');
+    const out = redact(input) as Record<string, unknown>;
+    expect(Object.keys(out)).toEqual(["a", "__proto__"]);
+    expect(JSON.stringify(out)).toContain("payload");
+    expect(({} as Record<string, unknown>).evil).toBeUndefined();
+  });
+
   it("scrubs Gantry tokens from string values", () => {
     const out = redact({ text: "use gat_eyJhIjoxfQ.abc-DEF_12 now", d: "gad_x.y" });
     expect(out).toEqual({ text: "use [REDACTED] now", d: "[REDACTED]" });
