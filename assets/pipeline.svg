@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 330" width="1200" height="330" role="img" aria-label="Gantry pipeline: agent call passes audit, rateLimit, timeout, idempotency, approval, annotations and outputLimit before the handler; any module can return a refusal">
+<title>Gantry pipeline</title>
+<style>
+  .bg{fill:#FFFFFF} .ink{fill:#0F172A} .muted{fill:#475569} .box{fill:#F1F5F9;stroke:#CBD5E1}
+  .mod{fill:#EFF6FF;stroke:#2563EB} .modtext{fill:#1E3A8A} .accent{fill:#EA580C} .line{stroke:#334155} .ref{stroke:#EA580C}
+  @media (prefers-color-scheme: dark) {
+    .bg{fill:#0D1117} .ink{fill:#F8FAFC} .muted{fill:#94A3B8} .box{fill:#161B22;stroke:#30363D}
+    .mod{fill:#0F1B33;stroke:#3B82F6} .modtext{fill:#BFDBFE} .line{stroke:#94A3B8}
+  }
+  text{font-family:Inter,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
+</style>
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748B"/></marker>
+  <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#EA580C"/></marker>
+</defs>
+<rect class="bg" width="1200" height="330" rx="16"/>
+<text class="ink" x="40" y="44" font-size="20" font-weight="700">One pipeline around every tools/call</text>
+<text class="muted" x="40" y="70" font-size="14">Each module calls next() or returns its own result. Refusals come back to the agent as tool results it can act on.</text>
+<rect class="box" x="30" y="120" width="96" height="76" rx="12"/>
+<text class="ink" x="78" y="155" font-size="16" font-weight="700" text-anchor="middle">Agent</text>
+<text class="muted" x="78" y="176" font-size="12" text-anchor="middle">tools/call</text>
+<rect class="mod" x="150" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
+<text class="modtext" x="209.0" y="154" font-size="14" font-weight="700" text-anchor="middle">audit</text>
+<text class="muted" x="209.0" y="175" font-size="12" text-anchor="middle">log</text>
+<rect class="mod" x="280" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
+<text class="modtext" x="339.0" y="154" font-size="14" font-weight="700" text-anchor="middle">rateLimit</text>
+<text class="muted" x="339.0" y="175" font-size="12" text-anchor="middle">cap</text>
+<rect class="mod" x="410" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
+<text class="modtext" x="469.0" y="154" font-size="14" font-weight="700" text-anchor="middle">timeout</text>
+<text class="muted" x="469.0" y="175" font-size="12" text-anchor="middle">stop</text>
+<rect class="mod" x="540" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
+<text class="modtext" x="599.0" y="154" font-size="14" font-weight="700" text-anchor="middle">idempotency</text>
+<text class="muted" x="599.0" y="175" font-size="12" text-anchor="middle">dedupe</text>
+<rect class="mod" x="670" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
+<text class="modtext" x="729.0" y="154" font-size="14" font-weight="700" text-anchor="middle">approval</text>
+<text class="muted" x="729.0" y="175" font-size="12" text-anchor="middle">ask</text>
+<rect class="mod" x="800" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
+<text class="modtext" x="859.0" y="154" font-size="14" font-weight="700" text-anchor="middle">annotations</text>
+<text class="muted" x="859.0" y="175" font-size="12" text-anchor="middle">guard</text>
+<rect class="mod" x="930" y="120" width="118" height="76" rx="12" stroke-width="1.5"/>
+<text class="modtext" x="989.0" y="154" font-size="14" font-weight="700" text-anchor="middle">outputLimit</text>
+<text class="muted" x="989.0" y="175" font-size="12" text-anchor="middle">trim</text>
+<rect class="box" x="1068" y="120" width="102" height="76" rx="12"/>
+<text class="ink" x="1119.0" y="155" font-size="16" font-weight="700" text-anchor="middle">Handler</text>
+<text class="muted" x="1119.0" y="176" font-size="12" text-anchor="middle">your tool</text>
+<line class="line" x1="127" y1="158" x2="148" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="269" y1="158" x2="278" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="399" y1="158" x2="408" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="529" y1="158" x2="538" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="659" y1="158" x2="668" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="789" y1="158" x2="798" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="919" y1="158" x2="928" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<line class="line" x1="1049" y1="158" x2="1066" y2="158" stroke-width="1.5" marker-end="url(#a)"/>
+<path class="ref" d="M729.0 198 V250 H78 V200" fill="none" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#r)"/>
+<rect x="723.0" y="244" width="12" height="12" rx="3" class="accent"/>
+<text class="ink" x="200" y="278" font-size="14" font-weight="600">Refusal: isError + structuredContent.gantry.code</text>
+<text class="muted" x="200" y="300" font-size="13">APPROVAL_REQUIRED, RATE_LIMITED, TIMEOUT, DUPLICATE_IN_FLIGHT, ANNOTATION_VIOLATION, UNAVAILABLE ...</text>
+</svg>

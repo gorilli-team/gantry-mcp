@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 444" width="760" height="444" role="img" aria-label="Pipeline overhead per module, p50 in microseconds. Full stack 10.2 microseconds.">
+<title>Gantry pipeline overhead (p50, microseconds)</title>
+<style>
+  .bg{fill:#FFFFFF} .title{fill:#0F172A;font-weight:700;font-size:17px} .sub,.tick{fill:#475569;font-size:12px}
+  .label{fill:#1E293B;font-size:13px} .value{fill:#0F172A;font-size:12px;font-weight:600}
+  .bar{fill:#2563EB} .hl{fill:#EA580C} .grid{stroke:#E2E8F0;stroke-width:1}
+  @media (prefers-color-scheme: dark) {
+    .bg{fill:#0D1117} .title{fill:#F8FAFC} .sub,.tick{fill:#94A3B8} .label{fill:#E2E8F0} .value{fill:#F8FAFC}
+    .bar{fill:#3B82F6} .grid{stroke:#21262D}
+  }
+  text{font-family:Inter,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
+</style>
+<rect class="bg" width="760" height="444" rx="16"/>
+<text class="title" x="24" y="36">Pipeline overhead per call (p50, µs)</text>
+<text class="sub" x="24" y="58">All seven modules add 8.5 µs over a bare handler. Budget: 500 µs. memoryStore, Node v24.22.1.</text>
+<line class="grid" x1="200" y1="84" x2="200" y2="374"/><text class="tick" x="200" y="392" text-anchor="middle">0</text>
+<line class="grid" x1="267.1428571428571" y1="84" x2="267.1428571428571" y2="374"/><text class="tick" x="267.1428571428571" y="392" text-anchor="middle">2</text>
+<line class="grid" x1="334.2857142857143" y1="84" x2="334.2857142857143" y2="374"/><text class="tick" x="334.2857142857143" y="392" text-anchor="middle">4</text>
+<line class="grid" x1="401.42857142857144" y1="84" x2="401.42857142857144" y2="374"/><text class="tick" x="401.42857142857144" y="392" text-anchor="middle">6</text>
+<line class="grid" x1="468.57142857142856" y1="84" x2="468.57142857142856" y2="374"/><text class="tick" x="468.57142857142856" y="392" text-anchor="middle">8</text>
+<line class="grid" x1="535.7142857142858" y1="84" x2="535.7142857142858" y2="374"/><text class="tick" x="535.7142857142858" y="392" text-anchor="middle">10</text>
+<line class="grid" x1="602.8571428571429" y1="84" x2="602.8571428571429" y2="374"/><text class="tick" x="602.8571428571429" y="392" text-anchor="middle">12</text>
+<line class="grid" x1="670" y1="84" x2="670" y2="374"/><text class="tick" x="670" y="392" text-anchor="middle">14</text>
+<text class="label" x="188" y="105" text-anchor="end">no middleware</text>
+<path class="bar" d="M200 92h53.34000000000003a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-53.34000000000003z"><title>no middleware: p50 1.7 µs, p95 8.3 µs</title></path>
+<text class="value" x="265.34000000000003" y="105">1.7 µs</text>
+<text class="label" x="188" y="137" text-anchor="end">audit</text>
+<path class="bar" d="M200 124h147.07142857142856a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-147.07142857142856z"><title>audit: p50 4.5 µs, p95 13.5 µs</title></path>
+<text class="value" x="359.07142857142856" y="137">4.5 µs</text>
+<text class="label" x="188" y="169" text-anchor="end">rateLimit</text>
+<path class="bar" d="M200 156h60.32285714285712a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-60.32285714285712z"><title>rateLimit: p50 1.9 µs, p95 5.7 µs</title></path>
+<text class="value" x="272.3228571428571" y="169">1.9 µs</text>
+<text class="label" x="188" y="201" text-anchor="end">timeout</text>
+<path class="bar" d="M200 188h50.553571428571445a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-50.553571428571445z"><title>timeout: p50 1.6 µs, p95 3.0 µs</title></path>
+<text class="value" x="262.55357142857144" y="201">1.6 µs</text>
+<text class="label" x="188" y="233" text-anchor="end">idempotency</text>
+<path class="bar" d="M200 220h163.8571428571429a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-163.8571428571429z"><title>idempotency: p50 5.0 µs, p95 19.6 µs</title></path>
+<text class="value" x="375.8571428571429" y="233">5.0 µs</text>
+<text class="label" x="188" y="265" text-anchor="end">approval (pass-through)</text>
+<path class="bar" d="M200 252h40.75071428571428a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-40.75071428571428z"><title>approval (pass-through): p50 1.3 µs, p95 2.7 µs</title></path>
+<text class="value" x="252.75071428571428" y="265">1.3 µs</text>
+<text class="label" x="188" y="297" text-anchor="end">annotations</text>
+<path class="bar" d="M200 284h42.16071428571428a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-42.16071428571428z"><title>annotations: p50 1.4 µs, p95 3.4 µs</title></path>
+<text class="value" x="254.16071428571428" y="297">1.4 µs</text>
+<text class="label" x="188" y="329" text-anchor="end">outputLimit</text>
+<path class="bar" d="M200 316h42.16071428571428a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-42.16071428571428z"><title>outputLimit: p50 1.4 µs, p95 2.8 µs</title></path>
+<text class="value" x="254.16071428571428" y="329">1.4 µs</text>
+<text class="label" x="188" y="361" text-anchor="end">full stack</text>
+<path class="hl" d="M200 348h337.3207142857143a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-337.3207142857143z"><title>full stack: p50 10.2 µs, p95 33.5 µs</title></path>
+<text class="value" x="549.3207142857143" y="361">10.2 µs</text>
+<text class="sub" x="435" y="428" text-anchor="middle">microseconds, lower is better</text>
+</svg>

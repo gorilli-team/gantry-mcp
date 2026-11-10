@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-label="Gantry: production middleware for MCP servers">
+  <title>Gantry: production middleware for MCP servers</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F8FAFC"/><stop offset="1" stop-color="#E7EEF9"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#475569" stroke-opacity="0.12" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="400" fill="url(#bg)"/>
+  <rect width="1280" height="400" fill="url(#grid)"/>
+  <g transform="translate(96 88)">
+    <rect x="0" y="0" width="210" height="28" rx="8" fill="#EA580C"/>
+    <rect x="22" y="28" width="26" height="164" rx="8" fill="#2563EB"/>
+    <rect x="162" y="28" width="26" height="164" rx="8" fill="#2563EB"/>
+    <rect x="80" y="28" width="50" height="16" rx="5" fill="#475569"/>
+    <rect x="101" y="44" width="8" height="40" fill="#475569"/>
+    <rect x="66" y="84" width="78" height="58" rx="12" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.4"/>
+    <path d="M88 113 l12 12 l22 -24" fill="none" stroke="#EA580C" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="372" y="168" font-size="96" font-weight="800" fill="#0F172A" letter-spacing="-3">Gantry</text>
+    <text x="376" y="218" font-size="30" font-weight="500" fill="#475569">Production middleware for MCP servers</text>
+    <g font-size="17" font-weight="600" fill="#1E293B">
+      <rect x="376" y="258" width="108" height="38" rx="19" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.35"/><text x="390" y="283">approval</text>
+      <rect x="494" y="258" width="138" height="38" rx="19" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.35"/><text x="508" y="283">idempotency</text>
+      <rect x="642" y="258" width="118" height="38" rx="19" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.35"/><text x="656" y="283">rateLimit</text>
+      <rect x="770" y="258" width="78" height="38" rx="19" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.35"/><text x="784" y="283">audit</text>
+      <rect x="858" y="258" width="98" height="38" rx="19" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.35"/><text x="872" y="283">timeout</text>
+      <rect x="966" y="258" width="138" height="38" rx="19" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.35"/><text x="980" y="283">annotations</text>
+      <rect x="1114" y="258" width="138" height="38" rx="19" fill="#FFFFFF" stroke="#475569" stroke-opacity="0.35"/><text x="1128" y="283">outputLimit</text>
+    </g>
+  </g>
+</svg>
