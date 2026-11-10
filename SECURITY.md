@@ -35,17 +35,20 @@ Principles that apply to every module:
 
 ### approval
 
-| Threat                                                | Mitigation                                                                                                                      |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Agent forges a token                                  | HMAC-SHA256 with a purpose-derived key from a secret of 32+ characters; constant-time comparison.                               |
-| Agent replays a token                                 | Proposals are consumed atomically (`Store.consume`); a token works once. Concurrency tested.                                    |
-| Agent swaps arguments after approval                  | Token and out-of-band decisions are bound to `argsHash` (SHA-256 of RFC 8785 canonical JSON), tool name, principal and session. |
-| Another principal or session reuses an approval       | Principal and session are part of the binding.                                                                                  |
-| Stale approval                                        | Default TTL 5 minutes, enforced by expiry in the signed payload and store TTL.                                                  |
-| Burning a valid token with forged attempts            | Signature and binding are checked before consumption.                                                                           |
-| Token for one purpose used for another                | Approval tokens and decision tokens use separate derived keys and prefixes.                                                     |
-| Misleading preview (control characters, RTL override) | Previews are sanitized and length-capped; notifiers must still escape for their format.                                         |
-| Approval channel down                                 | Refusal, never a silent pass. No available mode means `APPROVAL_REQUIRED`.                                                      |
+| Threat                                                                                     | Mitigation                                                                                                                               |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Agent forges a token                                                                       | HMAC-SHA256 with a purpose-derived key from a secret of 32+ characters; constant-time comparison.                                        |
+| Agent replays a token                                                                      | Proposals are consumed atomically (`Store.consume`); a token works once. Concurrency tested.                                             |
+| Agent swaps arguments after approval                                                       | Token and out-of-band decisions are bound to `argsHash` (SHA-256 of RFC 8785 canonical JSON), tool name, principal and session.          |
+| Another principal or session reuses an approval                                            | Principal and session are part of the binding.                                                                                           |
+| Stale approval                                                                             | Default TTL 5 minutes, enforced by expiry in the signed payload and store TTL.                                                           |
+| Burning a valid token with forged attempts                                                 | Signature and binding are checked before consumption.                                                                                    |
+| Token for one purpose used for another                                                     | Approval tokens and decision tokens use separate derived keys and prefixes.                                                              |
+| Misleading preview (control, zero-width, bidi characters; hiding fields past a length cap) | Previews are sanitized; a preview that would be truncated is refused instead of shown. Notifiers must still escape for their format.     |
+| Approval channel down                                                                      | Refusal, never a silent pass. No available mode means `APPROVAL_REQUIRED`.                                                               |
+| Downgrading elicit to a weaker mode                                                        | Session-negotiated capabilities win over per-request `_meta`; a failed prompt refuses instead of falling back. Token fallback is opt-in. |
+| Approval arriving after a timeout                                                          | The handler does not run once the call's signal is aborted.                                                                              |
+| Unannotated destructive tools                                                              | By default every tool that is not `readOnlyHint` and not `destructiveHint: false` needs approval (MCP semantics).                        |
 
 **What `token` mode does not protect against.** Token mode proves that the exact call was proposed and then confirmed with identical arguments within the TTL. It does **not** prove a human saw or approved it: the token is returned to the agent, and an agent (or prompt injection) can pass it straight back. It is meaningful only when the client shows tool calls to the user and asks before running them, or as a deliberate two-step speed bump. For real human-in-the-loop guarantees use `elicit` (the client asks the human) or `out-of-band` (the agent never sees a token). If you configure `fallback: ["token"]`, clients without elicitation get the weaker guarantee.
 
