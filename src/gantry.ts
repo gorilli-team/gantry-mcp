@@ -3,6 +3,7 @@ import { hashArgs } from "./canonical.js";
 import { type Clock, systemClock } from "./clock.js";
 import { GantryCode, GantryConfigError, gantryError } from "./errors.js";
 import { compose, type Handler } from "./pipeline.js";
+import { recommended } from "./recommended.js";
 import { reservedValues, withReservedArgs } from "./schema.js";
 import { memoryStore } from "./store/memory.js";
 import type { Store } from "./store/types.js";
@@ -427,3 +428,6 @@ interface RegisteredToolLike {
 export function gantry(server: McpServerLike, options?: GantryOptions): Gantry {
   return new Gantry(server, options);
 }
+
+/** `gantry.recommended()` returns the recommended middleware stack. */
+gantry.recommended = recommended;

@@ -19,6 +19,7 @@ export {
   type WithGantry,
 } from "./gantry.js";
 export { compose, defineMiddleware } from "./pipeline.js";
+export { type RecommendedOptions, recommended } from "./recommended.js";
 export { type MemoryStoreOptions, memoryStore } from "./store/memory.js";
 export type { Store } from "./store/types.js";
 export type * from "./types.js";
