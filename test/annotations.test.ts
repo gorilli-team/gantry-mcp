@@ -107,6 +107,46 @@ describe("annotations: enforcement", () => {
   });
 });
 
+describe("annotations: guard coverage", () => {
+  it("guards awaited results, callback arguments and common write names", async () => {
+    const writes: string[] = [];
+    const conn = { deleteAll: () => writes.push("deleteAll"), findAll: () => ["row"] };
+    const db = {
+      connect: async () => conn,
+      transaction: (fn: (tx: typeof conn) => unknown) => fn(conn),
+      findOneAndDelete: () => writes.push("findOneAndDelete"),
+      $executeRaw: () => writes.push("$executeRaw"),
+    };
+    const server = newServer();
+    const g = gantry(server, { clients: { db }, use: [annotations()] });
+    const ro = { annotations: { readOnlyHint: true } };
+    g.tool("awaited", ro, async (c: Ctx) => {
+      const d = c.gantry.clients.db as typeof db;
+      const cn = await d.connect();
+      const rows = cn.findAll().length;
+      cn.deleteAll();
+      return ok(String(rows));
+    });
+    g.tool("tx", ro, async (c: Ctx) => {
+      (c.gantry.clients.db as typeof db).transaction((tx) => tx.deleteAll());
+      return ok("x");
+    });
+    g.tool("fo", ro, async (c: Ctx) => {
+      (c.gantry.clients.db as typeof db).findOneAndDelete();
+      return ok("x");
+    });
+    g.tool("raw", ro, async (c: Ctx) => {
+      (c.gantry.clients.db as typeof db).$executeRaw();
+      return ok("x");
+    });
+    const t = await gantryTest(g);
+    for (const name of ["awaited", "tx", "fo", "raw"]) {
+      await expect(t.call(name)).resolves.toBeGantryError("ANNOTATION_VIOLATION");
+    }
+    expect(writes).toEqual([]);
+  });
+});
+
 describe("annotations: strict registration", () => {
   it("refuses write-looking tools without annotations and contradictions", () => {
     const { g } = setup({ strict: true });

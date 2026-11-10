@@ -18,7 +18,7 @@ export interface AnnotationsOptions {
 }
 
 const DEFAULT_WRITE_METHODS: Array<string | RegExp> = [
-  /^(insert|update|delete|remove|create|save|put|post|patch|set|drop|write|upsert|replace|destroy|truncate|bulk|increment|decrement|push|send|add|merge|alter|grant|revoke)/i,
+  /^(insert|update|delete|remove|create|save|put|post|patch|set|drop|write|upsert|replace|destroy|truncate|bulk|increment|decrement|push|send|add|merge|alter|grant|revoke|exec|execute|\$execute|findOneAnd|findAndModify|findByIdAnd|unlink|rename|copy|move|append|publish|emit|enqueue|transfer|charge|refund|cancel)/i,
 ];
 const DEFAULT_WRITE_NAMES =
   /^(delete|remove|send|update|create|write|drop|insert|set|put|post|patch|cancel|pay|transfer|refund|archive|publish|deploy|move|rename|upload|grant|revoke|reset|purge)[_-]/i;
@@ -58,8 +58,23 @@ export function annotations(options: AnnotationsOptions = {}): Middleware {
               throw new AnnotationViolationError(`Blocked write ${where}().`);
             };
           }
-          return (...args: unknown[]) =>
-            guard(Reflect.apply(inner, obj, args), `${where}()`, cache);
+          return (...args: unknown[]) => {
+            // Callbacks receive guarded values too (e.g. `tx` in db.transaction(tx => ...)).
+            const guardedArgs = args.map((a) =>
+              typeof a === "function"
+                ? (...cbArgs: unknown[]) =>
+                    (a as (...x: unknown[]) => unknown)(
+                      ...cbArgs.map((c) => guard(c, `${where}(cb)`, cache)),
+                    )
+                : a,
+            );
+            const out = Reflect.apply(inner, obj, guardedArgs);
+            // Promises resolve to guarded values, so `await client.connect()` stays guarded.
+            if (out && typeof (out as { then?: unknown }).then === "function") {
+              return Promise.resolve(out).then((v) => guard(v, `${where}()`, cache));
+            }
+            return guard(out, `${where}()`, cache);
+          };
         }
         return guard(inner, where, cache);
       },
