@@ -17,7 +17,13 @@
     "declarationMap": true,
     "sourceMap": true,
     "rootDir": ".",
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@gorilli/gantry-mcp": ["./src/index.ts"],
+      "@gorilli/gantry-mcp/modules": ["./src/modules/index.ts"],
+      "@gorilli/gantry-mcp/modules/*": ["./src/modules/*.ts"],
+      "@gorilli/gantry-mcp/testing": ["./src/testing/index.ts"]
+    }
   },
   "include": ["src", "stores", "test", "examples", "bench"]
 }

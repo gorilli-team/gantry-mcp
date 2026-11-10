@@ -1,0 +1,27 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Security issue? Do not file it here. See SECURITY.md."
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: A gantryTest() snippet is ideal.
+      render: ts
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: "gantry-mcp 0.1.0, @modelcontextprotocol/server 2.4.0, Node 24"
+    validations:
+      required: true

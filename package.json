@@ -24,10 +24,13 @@
   },
   "sideEffects": false,
   "files": [
-    "dist",
+    "dist/src",
+    "dist/stores",
+    "!dist/**/*.test.*",
     "README.md",
     "SECURITY.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
@@ -59,14 +62,19 @@
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "biome check .",
+    "lint": "biome check . --error-on-warnings",
     "format": "biome check --write .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "bench": "node --experimental-strip-types bench/pipeline.bench.ts",
-    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
+    "bench": "npm run build && node bench/pipeline.bench.ts && node bench/chart.ts",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build",
+    "example:quickstart": "npm run build && node examples/quickstart/server.ts",
+    "example:crm": "npm run build && node examples/crm-server/server.ts",
+    "example:telegram": "npm run build && node examples/telegram-approval/server.ts",
+    "brand": "node assets/build-brand.ts && node bench/chart.ts"
   },
   "peerDependencies": {
+    "@modelcontextprotocol/client": "^2.0.0",
     "@modelcontextprotocol/sdk": "^1.20.0",
     "@modelcontextprotocol/server": "^2.0.0",
     "ioredis": "^5.0.0 || ^6.0.0",
@@ -84,6 +92,9 @@
     },
     "mongodb": {
       "optional": true
+    },
+    "@modelcontextprotocol/client": {
+      "optional": true
     }
   },
   "publishConfig": {
@@ -98,6 +109,8 @@
     "@types/node": "24.19.2",
     "@vitest/coverage-v8": "5.1.0",
     "fast-check": "4.10.2",
+    "ioredis": "5.8.2",
+    "mongodb": "7.8.0",
     "typescript": "7.0.2",
     "vitest": "5.1.0",
     "zod": "4.6.7"
