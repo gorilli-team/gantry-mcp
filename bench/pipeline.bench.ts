@@ -28,7 +28,7 @@ function build(use: Middleware[]): Callback {
   const g = gantry(server, { use, logger: { warn: () => {}, error: () => {} } });
   g.tool(
     "write_row",
-    { inputSchema: z.object({ i: z.number() }) },
+    { inputSchema: z.object({ i: z.number() }), annotations: { destructiveHint: false } },
     async ({ i }: { i: number }) => ({
       content: [{ type: "text", text: `row ${i}` }],
     }),

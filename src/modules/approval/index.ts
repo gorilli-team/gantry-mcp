@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { canonicalize } from "../../canonical.js";
 import { type Clock, sleep } from "../../clock.js";
 import { type Duration, parseDuration } from "../../duration.js";
 import { GantryCode, GantryConfigError, gantryError } from "../../errors.js";
@@ -13,9 +14,9 @@ import type {
   ToolInfo,
 } from "../../types.js";
 import { assertStrongSecret, deriveKey, sign, verify } from "./crypto.js";
-import { defaultPreview, sanitizePreview } from "./preview.js";
+import { defaultPreview, type PreparedPreview, preparePreview } from "./preview.js";
 
-export { escapeHtml, escapeMarkdown, sanitizePreview } from "./preview.js";
+export { escapeHtml, escapeMarkdown, preparePreview, sanitizePreview } from "./preview.js";
 
 export type ApprovalMode = "elicit" | "token" | "out-of-band";
 
@@ -34,7 +35,10 @@ export interface ApprovalRequest {
 }
 
 export interface ApprovalOptions {
-  /** Which calls need approval. Default: tools with `destructiveHint: true`. */
+  /**
+   * Which calls need approval. Default, following MCP annotation semantics:
+   * every tool that is not `readOnlyHint: true` and not `destructiveHint: false`.
+   */
   when?: (tool: ToolInfo, ctx: CallContext) => boolean;
   /** Preferred mode. Default "elicit". */
   mode?: ApprovalMode;
@@ -113,7 +117,11 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
   const ttl = parseDuration(options.ttl ?? "5m", "approval.ttl");
   const waitMs = options.wait === undefined ? 0 : parseDuration(options.wait, "approval.wait");
   const prefix = options.prefix ?? "gantry:approval";
-  const when = options.when ?? ((tool: ToolInfo) => tool.annotations.destructiveHint === true);
+  // MCP semantics: a tool that is not read-only is destructive unless it says otherwise.
+  const when =
+    options.when ??
+    ((tool: ToolInfo) =>
+      tool.annotations.readOnlyHint !== true && tool.annotations.destructiveHint !== false);
   const tokenKey = needsSecret ? deriveKey(options.secret!, "approval-token") : undefined;
   const decisionKey = needsSecret ? deriveKey(options.secret!, "approval-decision") : undefined;
 
@@ -123,17 +131,32 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
 
   const proposalKey = (id: string) => `${prefix}:p:${id}`;
   const bindingKey = (ctx: CallContext) =>
-    `${prefix}:b:${sha256([ctx.principal, ctx.sessionId ?? "", ctx.tool.name, ctx.argsHash].join("\u0000"))}`;
+    `${prefix}:b:${sha256(canonicalize([ctx.principal, ctx.sessionId ?? null, ctx.tool.name, ctx.argsHash]))}`;
 
-  const previewFor = async (ctx: CallContext) => {
+  const previewFor = async (ctx: CallContext): Promise<PreparedPreview> => {
     try {
-      return sanitizePreview(String(await (options.preview ?? defaultPreview)(ctx)));
+      return preparePreview(String(await (options.preview ?? defaultPreview)(ctx)));
     } catch {
-      return sanitizePreview(defaultPreview(ctx));
+      return preparePreview(defaultPreview(ctx));
     }
   };
 
+  /** A human must see the whole call. Refuse rather than ask about a partial view. */
+  const previewTooLong = (ctx: CallContext) =>
+    gantryError(
+      GantryCode.APPROVAL_REQUIRED,
+      `${ctx.tool.name} needs approval, but its arguments are too long to show the user in full, so nothing was run. Use shorter arguments or split the operation.`,
+      { reason: "preview_too_long" },
+    );
+
   const approved = (ctx: CallContext, next: Next, mode: ApprovalMode, by?: string) => {
+    if (ctx.signal.aborted) {
+      // The approval arrived after the call was stopped (timeout or cancellation).
+      return gantryError(
+        GantryCode.TIMEOUT,
+        `The approval for ${ctx.tool.name} arrived after the call was stopped, so nothing was run. Call it again if the user still wants it.`,
+      );
+    }
     ctx.emit({ type: "approved", mode, ...(by ? { by } : {}) });
     return next();
   };
@@ -151,10 +174,11 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
   const viaElicit = async (ctx: CallContext, next: Next): Promise<CallToolResult | undefined> => {
     if (!ctx.elicit) return undefined;
     const preview = await previewFor(ctx);
+    if (preview.truncated) return previewTooLong(ctx);
     let answer: Awaited<ReturnType<NonNullable<CallContext["elicit"]>>>;
     try {
       answer = await ctx.elicit({
-        message: `The assistant wants to run "${ctx.tool.name}". Approve?\n\n${preview}`,
+        message: `The assistant wants to run "${ctx.tool.name}". Approve?\n\n${preview.text}`,
         requestedSchema: {
           type: "object",
           properties: {
@@ -245,7 +269,7 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
       sessionId: proposal.sessionId,
       exp,
     });
-    const preview = await previewFor(ctx);
+    const preview = (await previewFor(ctx)).text;
     ctx.emit({
       type: "approval_requested",
       mode: "token",
@@ -290,7 +314,13 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
       if (proposal && proposal.status !== "pending") {
         const consumed = (await s.consume(proposalKey(proposal.id))) as Proposal | undefined;
         await s.consume(bKey);
-        if (!consumed)
+        const matches =
+          consumed &&
+          consumed.principal === ctx.principal &&
+          consumed.sessionId === (ctx.sessionId ?? null) &&
+          consumed.tool === ctx.tool.name &&
+          consumed.argsHash === ctx.argsHash;
+        if (!consumed || !matches)
           return invalid(ctx, "This approval was already used. Call again to request a new one.");
         if (consumed.status === "approved")
           return approved(ctx, next, "out-of-band", consumed.decidedBy);
@@ -305,6 +335,8 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
         );
       }
 
+      const preview = await previewFor(ctx);
+      if (preview.truncated) return previewTooLong(ctx);
       const id = randomUUID();
       const exp = clock!.now() + ttl;
       const fresh: Proposal = {
@@ -324,7 +356,7 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
           tool: fresh.tool,
           principal: fresh.principal,
           ...(ctx.sessionId ? { sessionId: ctx.sessionId } : {}),
-          preview: await previewFor(ctx),
+          preview: preview.text,
           expiresAt: exp,
           approveToken: sign(decisionKey!, DECISION_PREFIX, { id, d: "approve", exp }),
           denyToken: sign(decisionKey!, DECISION_PREFIX, { id, d: "deny", exp }),

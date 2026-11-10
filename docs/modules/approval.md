@@ -19,7 +19,7 @@ approval({
 
 ## Modes
 
-**elicit.** Asks in the client (MCP elicitation). The human answers in their own UI; the agent cannot answer for them. If the client does not support elicitation, or the request cannot elicit (the 2026-07-28 protocol era replaces push elicitation), the next mode in `fallback` runs.
+**elicit.** Asks in the client (MCP elicitation). The human answers in their own UI; the agent cannot answer for them. If the session's client does not support elicitation, the next mode in `fallback` runs. If the prompt itself fails, the call is refused: Gantry never falls back to a weaker mode because asking failed. Capabilities negotiated for the session take precedence over per-request `_meta`, so a request cannot hide elicitation to force a fallback.
 
 **token.** Two calls. The first returns `APPROVAL_REQUIRED` with a token and a preview to show the user. The second call carries `_approvalToken` (added to the schema automatically). The token is HMAC-SHA256 over proposal id, tool, `argsHash`, principal, session and expiry; it is verified in constant time and consumed atomically, so it works once, for exactly that call, for that principal and session, before it expires.
 
@@ -35,9 +35,11 @@ app.post("/approve", async (req, res) =>
 );
 ```
 
+Following MCP annotation semantics, the default applies to every tool that is not `readOnlyHint: true` and not `destructiveHint: false`: an unannotated tool is treated as destructive.
+
 ## Previews
 
-The preview is built from agent-supplied arguments, so it is untrusted. Gantry strips control and bidi-override characters and caps the length. Notifiers must still escape it for their format (`escapeHtml`, `escapeMarkdown` are exported).
+The preview is built from agent-supplied arguments, so it is untrusted. Gantry strips control, zero-width and bidi-override characters, normalizes line separators and caps the length at 2000 characters. If the preview would be cut, Gantry refuses (`APPROVAL_REQUIRED`, `reason: "preview_too_long"`) instead of asking a human to approve a partial view. Notifiers must still escape it for their format (`escapeHtml`, `escapeMarkdown` are exported).
 
 ## Failure behavior
 

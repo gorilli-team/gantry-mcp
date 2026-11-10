@@ -404,3 +404,53 @@ describe("preview helpers", () => {
     expect(sanitizePreview("ok\nline\u0000‮")).toBe("ok\nline");
   });
 });
+
+describe("approval: hardening", () => {
+  it("treats unannotated tools as needing approval (MCP defaults)", async () => {
+    const server = newServer();
+    const g = gantry(server, { logger: quiet, use: [approval({})] });
+    const handler = vi.fn(async () => ok("ran"));
+    g.tool("mystery", {}, handler);
+    g.tool("safe_write", { annotations: { destructiveHint: false } }, handler);
+    const t = await gantryTest(g);
+    await expect(t.call("mystery")).resolves.toBeGantryError("APPROVAL_REQUIRED");
+    await expect(t.call("safe_write")).resolves.toBeGantryOk();
+  });
+
+  it("refuses to ask a human about a truncated preview", async () => {
+    const { g, handler } = setup({});
+    const t = await gantryTest(g, { clientCapabilities: clientProfiles.elicitation });
+    const r = await t.call("delete_client", { clientId: "x".repeat(3000) });
+    expect(getGantryPayload(r)?.reason).toBe("preview_too_long");
+    expect(t.elicitation.requests).toHaveLength(0);
+    expect(handler).not.toHaveBeenCalled();
+    const sent: ApprovalRequest[] = [];
+    const o = setup({ mode: "out-of-band", secret: SECRET, notifier: (q) => void sent.push(q) });
+    const t2 = await gantryTest(o.g);
+    await expect(t2.call("delete_client", { clientId: "x".repeat(3000) })).resolves.toBeGantryError(
+      "APPROVAL_REQUIRED",
+    );
+    expect(sent).toHaveLength(0);
+  });
+
+  it("strips invisible characters and line separators from previews", () => {
+    expect(sanitizePreview("a​b﻿c d⁦e")).toBe("abc\nde");
+  });
+
+  it("does not run when the approval arrives after a timeout", async () => {
+    const server = newServer();
+    const handler = vi.fn(async () => ok("ran"));
+    const { timeout } = await import("../src/modules/timeout.js");
+    const g = gantry(server, { logger: quiet, use: [timeout({ default: "1s" }), approval({})] });
+    g.tool("drop", { annotations: { destructiveHint: true } }, handler);
+    let answer!: (r: { action: "accept"; content: { approve: boolean } }) => void;
+    g._testing.elicit = () => new Promise((r) => (answer = r));
+    const t = await gantryTest(g);
+    const pending = t.call("drop");
+    await t.clock.advance(1000);
+    await expect(pending).resolves.toBeGantryError("TIMEOUT");
+    answer({ action: "accept", content: { approve: true } });
+    await t.clock.advance(10);
+    expect(handler).not.toHaveBeenCalled();
+  });
+});
