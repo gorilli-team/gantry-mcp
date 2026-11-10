@@ -351,10 +351,13 @@ export class Gantry {
 
   #capabilities(sdk: SdkContextLike): ClientCapabilities {
     if (this._testing.clientCapabilities) return this._testing.clientCapabilities;
-    const fromMeta = sdk.mcpReq?._meta?.[CLIENT_CAPABILITIES_META_KEY];
-    if (fromMeta && typeof fromMeta === "object") return fromMeta as ClientCapabilities;
+    // Capabilities negotiated for the session win. Per-request `_meta`
+    // capabilities (stateless 2026-era requests) are only used when there is no
+    // session-level value, so a request cannot hide elicitation to weaken approval.
     const caps = this.server.server?.getClientCapabilities?.();
-    return (caps && typeof caps === "object" ? caps : {}) as ClientCapabilities;
+    if (caps && typeof caps === "object") return caps as ClientCapabilities;
+    const fromMeta = sdk.mcpReq?._meta?.[CLIENT_CAPABILITIES_META_KEY];
+    return (fromMeta && typeof fromMeta === "object" ? fromMeta : {}) as ClientCapabilities;
   }
 
   #clientName(sdk: SdkContextLike): string | undefined {

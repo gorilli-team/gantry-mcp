@@ -17,17 +17,15 @@ export interface RecommendedOptions {
   /** Default { ttl: "24h" }. */
   idempotency?: IdempotencyOptions | false;
   /**
-   * Default: on for every `destructiveHint` tool, asking in the client.
-   * With a `secret`, falls back to token mode for clients that cannot elicit.
-   * Without one, such calls are refused.
+   * Default: on for every tool that may be destructive, asking in the client
+   * (elicitation). Clients that cannot elicit are refused. Token or
+   * out-of-band fallbacks are opt-in: `approval: { fallback: ["token"], secret }`.
    */
   approval?: ApprovalOptions | false;
   /** Default { enforce: true }. */
   annotations?: AnnotationsOptions | false;
   /** Default { maxTokens: 8000 }. */
   outputLimit?: OutputLimitOptions | false;
-  /** Shortcut for approval.secret. */
-  secret?: string;
 }
 
 /**
@@ -43,16 +41,8 @@ export function recommended(options: RecommendedOptions = {}): Middleware[] {
     out.push(rateLimit(options.rateLimit ?? { perPrincipal: "120/min" }));
   if (options.timeout !== false) out.push(timeout(options.timeout ?? { default: "30s" }));
   if (options.idempotency !== false) out.push(idempotency(options.idempotency ?? { ttl: "24h" }));
-  if (options.approval !== false) {
-    const secret = options.approval?.secret ?? options.secret;
-    out.push(
-      approval({
-        mode: "elicit",
-        ...(secret ? { fallback: ["token"] as const, secret } : {}),
-        ...(options.approval ?? {}),
-      } as ApprovalOptions),
-    );
-  }
+  if (options.approval !== false)
+    out.push(approval({ mode: "elicit", ...(options.approval ?? {}) }));
   if (options.annotations !== false)
     out.push(annotations(options.annotations ?? { enforce: true }));
   if (options.outputLimit !== false)

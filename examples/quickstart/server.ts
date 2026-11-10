@@ -1,6 +1,6 @@
 /**
  * Quickstart: an MCP server with the recommended Gantry stack.
- * Run: GANTRY_SECRET=$(openssl rand -base64 32) node --experimental-strip-types examples/quickstart/server.ts
+ * Run: npm run example:quickstart
  */
 
 import { gantry, memoryStore } from "@gorilli/gantry-mcp";
@@ -10,11 +10,11 @@ import { z } from "zod";
 
 const notes = new Map<string, string>([["welcome", "Hello from Gantry"]]);
 
-export function createServer(secret = process.env.GANTRY_SECRET) {
+export function createServer() {
   const server = new McpServer({ name: "notes", version: "1.0.0" });
   const g = gantry(server, {
     store: memoryStore(),
-    use: gantry.recommended({ secret, audit: { sink: (e) => console.error(JSON.stringify(e)) } }),
+    use: gantry.recommended({ audit: { sink: (e) => console.error(JSON.stringify(e)) } }),
   });
 
   g.tool(

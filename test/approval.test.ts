@@ -82,7 +82,7 @@ describe("approval: elicit", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it("falls back to the next mode when elicitation throws", async () => {
+  it("refuses, and does not fall back, when elicitation throws", async () => {
     const server = newServer();
     const g = gantry(server, {
       logger: quiet,
@@ -93,7 +93,24 @@ describe("approval: elicit", () => {
       throw new Error("not on this era");
     };
     const t = await gantryTest(g);
-    await expect(t.call("drop")).resolves.toBeGantryError("APPROVAL_REQUIRED");
+    await expect(t.call("drop")).resolves.toBeGantryError("UNAVAILABLE");
+  });
+
+  it("ignores per-request capabilities that contradict the session (no downgrade)", async () => {
+    const server = newServer();
+    const handler = vi.fn(async () => ok("wiped"));
+    const g = gantry(server, {
+      logger: quiet,
+      use: [approval({ fallback: ["token"], secret: SECRET })],
+    });
+    g.tool("wipe", { annotations: { destructiveHint: true } }, handler);
+    const t = await gantryTest(g, { clientCapabilities: clientProfiles.elicitation });
+    const spoof = { "io.modelcontextprotocol/clientCapabilities": {} };
+    t.elicitation.respond({ action: "decline" });
+    const r = await t.call("wipe", {}, { meta: spoof });
+    expect(r).toBeGantryError("APPROVAL_DENIED");
+    expect(t.elicitation.requests).toHaveLength(1);
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it("sanitizes custom previews and falls back when they throw", async () => {

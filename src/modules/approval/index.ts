@@ -167,10 +167,15 @@ export function approval(options: ApprovalOptions = {}): ApprovalMiddleware {
           required: ["approve"],
         },
       });
-    } catch {
-      // The client advertised elicitation but cannot do it here (e.g. a
-      // 2026-era request): let the next mode in the chain handle it.
-      return undefined;
+    } catch (error) {
+      // Never fall back to a weaker mode because asking failed: a client (or an
+      // attacker in front of it) could make elicitation fail on purpose.
+      api?.logger.error(`approval: elicitation failed for "${ctx.tool.name}"`, error);
+      return gantryError(
+        GantryCode.UNAVAILABLE,
+        `${ctx.tool.name} needs the user's approval, but the approval prompt failed. Nothing was run. Try again; if it keeps failing, tell the user.`,
+        { mode: "elicit" },
+      );
     }
     if (answer?.action === "accept" && answer.content?.approve === true)
       return approved(ctx, next, "elicit");

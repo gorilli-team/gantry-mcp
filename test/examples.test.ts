@@ -11,7 +11,7 @@ const txt = (r: { content: unknown[] }) => (r.content[0] as { text?: string }).t
 
 describe("examples/quickstart", () => {
   it("reads freely and asks before deleting", async () => {
-    const { g } = createQuickstart(SECRET);
+    const { g } = createQuickstart();
     const t = await gantryTest(g, { clientCapabilities: clientProfiles.elicitation });
     expect(txt(await t.call("read_note", { id: "welcome" }))).toBe("Hello from Gantry");
     t.elicitation.respond({ action: "accept", content: { approve: true } });

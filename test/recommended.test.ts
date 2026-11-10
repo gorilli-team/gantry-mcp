@@ -9,9 +9,7 @@ const ok = (t: string) => ({ content: [{ type: "text", text: t }] });
 
 describe("recommended()", () => {
   it("returns the stack in the recommended order", () => {
-    const names = recommended({ audit: { sink: () => {} }, secret: SECRET }).map(
-      (m) => m.gantryName,
-    );
+    const names = recommended({ audit: { sink: () => {} } }).map((m) => m.gantryName);
     expect(names).toEqual([
       "audit",
       "rateLimit",
@@ -53,9 +51,11 @@ describe("recommended()", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it("falls back to token approval when given a secret", async () => {
+  it("falls back to token approval only when asked to", async () => {
     const server = newServer();
-    const g = gantry(server, { use: recommended({ secret: SECRET }) });
+    const g = gantry(server, {
+      use: recommended({ approval: { fallback: ["token"], secret: SECRET } }),
+    });
     g.tool(
       "delete_client",
       { inputSchema: { id: z.string() }, annotations: { destructiveHint: true } },
