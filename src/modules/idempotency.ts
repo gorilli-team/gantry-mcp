@@ -16,6 +16,8 @@ export interface IdempotencyOptions {
   waitFor?: Duration;
   /** Lock lifetime, the upper bound of a single execution. Default "10m". */
   lockTtl?: Duration;
+  /** Results larger than this (JSON bytes) are not stored, so one caller cannot fill the store. Default 256 KiB. */
+  maxResultBytes?: number;
   /** Key prefix in the store. Default "gantry:idem". */
   prefix?: string;
 }
@@ -40,6 +42,7 @@ export function idempotency(options: IdempotencyOptions = {}): Middleware {
   const lockTtl = parseDuration(options.lockTtl ?? "10m", "idempotency.lockTtl");
   const scope = options.scope ?? "principal";
   const prefix = options.prefix ?? "gantry:idem";
+  const maxResultBytes = options.maxResultBytes ?? 256 * 1024;
   const applies = options.onlyFor ?? ((tool: ToolInfo) => tool.annotations.readOnlyHint !== true);
   const inFlight = new Map<string, { argsHash: string; running: Promise<CallToolResult> }>();
 
@@ -101,7 +104,10 @@ export function idempotency(options: IdempotencyOptions = {}): Middleware {
             const running = next();
             inFlight.set(key, { argsHash: ctx.argsHash, running });
             const result = await running;
-            if (!result.isError) {
+            const tooBig =
+              !result.isError && Buffer.byteLength(JSON.stringify(result), "utf8") > maxResultBytes;
+            if (tooBig) ctx.emit({ type: "idempotency_result_too_large" });
+            if (!result.isError && !tooBig) {
               try {
                 await ctx.store.set(
                   key,

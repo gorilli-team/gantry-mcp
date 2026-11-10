@@ -188,6 +188,16 @@ describe("idempotency", () => {
     await expect(p2).resolves.toBeGantryError("DUPLICATE_IN_FLIGHT");
   });
 
+  it("does not store results over maxResultBytes", async () => {
+    const { g } = setup({ maxResultBytes: 100 });
+    let n = 0;
+    g.tool("big", {}, async () => ok(`${++n}`.padEnd(500, "x")));
+    const t = await gantryTest(g);
+    await t.call("big");
+    expect(txt(await t.call("big"))?.startsWith("2")).toBe(true);
+    expect(t.events).toContainEvent({ type: "idempotency_result_too_large" });
+  });
+
   it("fails closed when the store is down", async () => {
     const handler = vi.fn(async () => ok("x"));
     const broken = { ...memoryStore(), get: async () => Promise.reject(new Error("down")) };
