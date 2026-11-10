@@ -24,10 +24,13 @@
   },
   "sideEffects": false,
   "files": [
-    "dist",
+    "dist/src",
+    "dist/stores",
+    "!dist/**/*.test.*",
     "README.md",
     "SECURITY.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
@@ -67,11 +70,11 @@
     "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "peerDependencies": {
+    "@modelcontextprotocol/client": "^2.0.0",
     "@modelcontextprotocol/sdk": "^1.20.0",
     "@modelcontextprotocol/server": "^2.0.0",
     "ioredis": "^5.0.0 || ^6.0.0",
-    "mongodb": "^6.0.0 || ^7.0.0",
-    "@modelcontextprotocol/client": "^2.0.0"
+    "mongodb": "^6.0.0 || ^7.0.0"
   },
   "peerDependenciesMeta": {
     "@modelcontextprotocol/server": {
@@ -102,6 +105,8 @@
     "@types/node": "24.19.2",
     "@vitest/coverage-v8": "5.1.0",
     "fast-check": "4.10.2",
+    "ioredis": "5.8.2",
+    "mongodb": "7.8.0",
     "typescript": "7.0.2",
     "vitest": "5.1.0",
     "zod": "4.6.7"
